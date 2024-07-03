@@ -69,7 +69,8 @@ const QList<MemoryDomain>& NWAccess::memoriesDomains() const
 void NWAccess::onReadyRead()
 {
     EmuNWAccessClient::Reply reply = client->readReply();
-    qDebug() << "Reply" << reply.cmd << reply.toMap();
+    if (reply.cmd != "CORE_READ")
+        qDebug() << "Reply" << reply.cmd << reply.toMap();
     if (reply.cmd == "EMULATOR_INFO")
     {
         auto map = reply.toMap();

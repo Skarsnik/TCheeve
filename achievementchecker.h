@@ -32,11 +32,13 @@ private:
         rc_value_t* variables;
     } rc_condset_memrefs_t;
 
+    rc_memref_t*                                m_memrefs;
     char*                                       virtualRAM;
     QMap<unsigned int, QList<QPair<int, int> > > m_achievementsMemLists;
     QList<QPair<int, int> >                     m_memoriesToCheck;
     QMap<unsigned int, rc_condset_t*>           cheevosCondset;
     QMap<unsigned int, rc_condset_memrefs_t*>   cheevosMemRefs;
+    QMap<unsigned int, rc_trigger_t*>           cheevosTriggers;
 
     void free_memrefs_t(rc_condset_memrefs_t*);
     void free_condset_t(rc_condset_t*);

@@ -9,7 +9,7 @@ RAStuff::RAStuff(QWidget *parent)
     ui->setupUi(this);
     achChecker = new AchievementChecker(this);
     connect(achChecker, &AchievementChecker::achievementCompleted, this, &RAStuff::achievementCompleted);
-    doRegularLogin("Skarsnik", "gobbla42");
+    //doRegularLogin("Skarsnik", "gobbla42");
     connect(&raManager, &RAManager::loginSuccess, this, [=] {
         nwaccess.connectToHost();
     });

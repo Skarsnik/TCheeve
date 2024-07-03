@@ -42,46 +42,33 @@ QList<QPair<int, int> > *AchievementChecker::prepareCheck(QList<Achievement> &ac
 {
     cheevosCondset.clear();
     cheevosMemRefs.clear();
+    m_memrefs = (rc_memref_t*) malloc(sizeof(m_memrefs));
+    memset(m_memrefs, 0, sizeof(m_memrefs));
     for (const Achievement& ach : achievements)
     {
-        /*if (ach.id != 959)
-            continue;*/
         QByteArray bTmp = ach.memAddrString.toLocal8Bit();
-        rc_condset_memrefs_t* memrefs = (rc_condset_memrefs_t*) malloc(sizeof(rc_condset_memrefs_t));
-        memrefs->memrefs = (rc_memref_t*) malloc(sizeof(rc_memref_t));
-        /*memrefs->memrefs->address = 0;
-        memrefs->memrefs->next = 0;
-        memrefs->memrefs->value.value = 0;
-        memrefs->memrefs->value.changed = 0;
-        memrefs->memrefs->value.is_indirect = 0;
-        memrefs->memrefs->value.prior = 0;
-        memrefs->memrefs->value.size = 0;
-        memrefs->memrefs->value.type = 0;*/
         const char* memaddr = bTmp.constData();
-        int alloc_size = rc_trigger_size(memaddr);
-        char* buffer = (char*) malloc(alloc_size);
-        qDebug() << ach.id  << memaddr;
-        rc_parse_state_t parse;
-
-        rc_init_parse_state(&parse, buffer, 0, 0);
-        rc_init_parse_state_memrefs(&parse, &memrefs->memrefs);
-        rc_init_parse_state_variables(&parse, &memrefs->variables);
-        rc_condset_t* condset = rc_parse_condset(&memaddr, &parse, 0);
-        rc_destroy_parse_state(&parse);
-        cheevosMemRefs[ach.id] = memrefs;
-        cheevosCondset[ach.id] = condset;
-        //qDebug() << "Mmemrefs in build" << memrefs;
-        rc_memref_t* m_next = memrefs->memrefs;
+        //rc_parse_state_t    parse;
+        rc_trigger_t*       new_trigger;
+        size_t              size_alloc = rc_trigger_size(memaddr);
+        void*               trigger_buffer = malloc(size_alloc);
+        //rc_init_parse_state(&parse, trigger_buffer, nullptr, 0);
+        //parse.first_memref = 0;
+        //new_trigger = RC_ALLOC(rc_trigger_t, &parse);
+        new_trigger = rc_parse_trigger(trigger_buffer, memaddr, NULL, 0);
+        cheevosTriggers[ach.id] = new_trigger;
+        //rc_destroy_parse_state(&parse);
+        rc_memref_t* m_next = new_trigger->memrefs;
+        qDebug() << "String : " << memaddr;
         while (m_next != nullptr)
         {
-            //qDebug() << "Memref->memref " << m_next;
+            qDebug() << "Address " << m_next->address;
             m_achievementsMemLists[ach.id].append(QPair<unsigned int, unsigned int>(m_next->address, sizeOfCheevosEnum(m_next->value.size)));
             //m_memoriesToCheck.append(QPair<unsigned int, unsigned int>(m_next->address, sizeOfCheevosEnum(m_next->value.size)));
             m_next = m_next->next;
         }
         //printDebug("Build achievement");
     }
-    printDebug("After loop");
     return buildMemoryChecks();
 }
 
@@ -176,40 +163,24 @@ void AchievementChecker::checkAchievements(const QByteArray& bdatas)
 {
     const char* datas = bdatas.constData();
 
-    qDebug() << "begining check memrefs->memrefs" << QString::number(cheevosMemRefs[959]->memrefs->address, 16);
     unsigned int pos = 0;
     for (const auto& mem : m_memoriesToCheck)
     {
         memcpy(virtualRAM + mem.first, datas + pos, mem.second);
+        pos += mem.second;
     }
-    qDebug() << "Bomb memory : " << QString::number(virtualRAM[0xf343], 16);
-    for (const auto& key : cheevosCondset.keys())
+    //qDebug() << "Bomb memory : " << QString::number(virtualRAM[0xf343], 16);
+    for (const auto& key : cheevosTriggers.keys())
     {
-        //qDebug() << "Checking " << key;
-        rc_condset_t* condset = cheevosCondset[key];
-        rc_condset_memrefs_t* memrefs = cheevosMemRefs[key];
-        rc_eval_state_t eval_state;
-
-        //qDebug() << "Checking memrefs->memrefs" << memrefs->memrefs;
-        //qDebug() << "Check Address : " << QString::number(memrefs->memrefs->address, 16);
-        rc_update_memref_values(memrefs->memrefs, peek, virtualRAM);
-        rc_update_variables(memrefs->variables, peek, virtualRAM, 0);
-
-        memset(&eval_state, 0, sizeof(eval_state));
-        eval_state.peek = peek;
-        eval_state.peek_userdata = virtualRAM;
-
-        //qDebug() << "WRAM at 0XF341" << QString::number(virtualRAM[0xF341], 16);
-        int result = rc_test_condset(condset, &eval_state);
-        qDebug() << key << "Achievement result " << result;
-        if (result == 1)
+        rc_trigger_t* trigger = cheevosTriggers[key];
+        rc_test_trigger(trigger, peek, virtualRAM, nullptr);
+        if (trigger->state == RC_TRIGGER_STATE_TRIGGERED)
         {
+            qDebug() << "WRAM at f340" << QString::number(virtualRAM[0xf340], 16);
+            qDebug() << key << "Achievement achieved " << key;
             m_achievementsMemLists.remove(key);
-            cheevosCondset.remove(key);
-            cheevosMemRefs.remove(key);
-            //free_memrefs_t(memrefs);
+            cheevosTriggers.remove(key);
             buildMemoryChecks();
-            exit (1);
             emit achievementCompleted(key);
         }
     }
@@ -222,7 +193,7 @@ QList<QPair<int, int> > *AchievementChecker::memoriesToCheck()
 
 void AchievementChecker::printDebug(QString where)
 {
-    qDebug() << where << QString::number(cheevosMemRefs[959]->memrefs->address, 16);
+    qDebug() << where << QString::number(cheevosTriggers[959]->memrefs->address, 16);
 }
 
 

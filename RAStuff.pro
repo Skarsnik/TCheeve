@@ -12,7 +12,7 @@ include(EmuNWAccess-qt.pri)
 
 INCLUDEPATH += rcheevos
 
-QMAKE_CXXFLAGS += /fsanitize=address
+#QMAKE_CXXFLAGS += /fsanitize=address
 
 SOURCES += \
     achievementchecker.cpp \
@@ -31,6 +31,7 @@ SOURCES += \
     rcheevos/operand.c \
     rcheevos/consoleinfo.c \
     rcheevos/rc_util.c \
+    rcheevos/trigger.c \
     usb2snes.cpp
 
 HEADERS += \

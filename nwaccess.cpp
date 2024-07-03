@@ -52,7 +52,7 @@ const NWAEmulatorInfos &NWAccess::emulatorInfos() const
 
 void NWAccess::getMemories(QList<QPair<int, int> >mems)
 {
-    qDebug() << mems;
+    //qDebug() << mems;
     client->cmdCoreReadMemory("WRAM", mems);
 }
 

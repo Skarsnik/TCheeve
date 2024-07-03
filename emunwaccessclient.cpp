@@ -189,7 +189,7 @@ void EmuNWAccessClient::cmdCoreReadMemory(const QString& memory, const QList< QP
         if (!s.isEmpty()) s += ";";
         s += toStringPreferHex(region.first) + ";" + toStringPreferDec(region.second);
     }
-    qDebug() << "Core memoris arg : " << s;
+    //qDebug() << "Core memoris arg : " << s;
     cmdCoreReadMemory(memory, s);
 }
 

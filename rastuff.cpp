@@ -80,14 +80,18 @@ void RAStuff::onGameInfosDone()
     text += "Game Tile : " + raManager.gameInfos.title + "\n\n";
     text += "Achievements : \n";
     memoriesToCheck = achChecker->prepareCheck(raManager.gameInfos.achievements);
+    achChecker->printDebug("After prepare check call");
     for (const auto& ach : raManager.gameInfos.achievements)
     {
         achievementsToCheck[ach.id] = &ach;
         text += "Name : " + ach.title + "\n";
         text += "\tDescription : " + ach.description + "\n";
     }
+    achChecker->printDebug("Before get memories");
     nwaccess.getMemories(*memoriesToCheck);
+    achChecker->printDebug("After get memories");
     ui->plainTextEdit->setPlainText(text);
+    achChecker->printDebug("End of GameInfo done");
 
 }
 

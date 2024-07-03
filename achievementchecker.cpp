@@ -40,16 +40,12 @@ static unsigned int sizeOfCheevosEnum(uint8_t memType)
 
 QList<QPair<int, int> > *AchievementChecker::prepareCheck(QList<Achievement> &achievements)
 {
-    rc_condset_t* condset;
-    char buffer[10000];
-
-    m_memoriesToCheck.clear();
     cheevosCondset.clear();
     cheevosMemRefs.clear();
     for (const Achievement& ach : achievements)
     {
-        if (ach.id != 959)
-            continue;
+        /*if (ach.id != 959)
+            continue;*/
         QByteArray bTmp = ach.memAddrString.toLocal8Bit();
         rc_condset_memrefs_t* memrefs = (rc_condset_memrefs_t*) malloc(sizeof(rc_condset_memrefs_t));
         memrefs->memrefs = (rc_memref_t*) malloc(sizeof(rc_memref_t));
@@ -62,24 +58,39 @@ QList<QPair<int, int> > *AchievementChecker::prepareCheck(QList<Achievement> &ac
         memrefs->memrefs->value.size = 0;
         memrefs->memrefs->value.type = 0;*/
         const char* memaddr = bTmp.constData();
+        int alloc_size = rc_trigger_size(memaddr);
+        char* buffer = (char*) malloc(alloc_size);
         qDebug() << ach.id  << memaddr;
         rc_parse_state_t parse;
 
         rc_init_parse_state(&parse, buffer, 0, 0);
         rc_init_parse_state_memrefs(&parse, &memrefs->memrefs);
         rc_init_parse_state_variables(&parse, &memrefs->variables);
-        condset = rc_parse_condset(&memaddr, &parse, 0);
+        rc_condset_t* condset = rc_parse_condset(&memaddr, &parse, 0);
         rc_destroy_parse_state(&parse);
         cheevosMemRefs[ach.id] = memrefs;
         cheevosCondset[ach.id] = condset;
-        qDebug() << "Mmemrefs in build" << memrefs;
+        //qDebug() << "Mmemrefs in build" << memrefs;
         rc_memref_t* m_next = memrefs->memrefs;
         while (m_next != nullptr)
         {
-            qDebug() << "Memref->memref " << m_next;
-            m_memoriesToCheck.append(QPair<unsigned int, unsigned int>(m_next->address, sizeOfCheevosEnum(m_next->value.size)));
+            //qDebug() << "Memref->memref " << m_next;
+            m_achievementsMemLists[ach.id].append(QPair<unsigned int, unsigned int>(m_next->address, sizeOfCheevosEnum(m_next->value.size)));
+            //m_memoriesToCheck.append(QPair<unsigned int, unsigned int>(m_next->address, sizeOfCheevosEnum(m_next->value.size)));
             m_next = m_next->next;
         }
+        //printDebug("Build achievement");
+    }
+    printDebug("After loop");
+    return buildMemoryChecks();
+}
+
+QList<QPair<int, int> >* AchievementChecker::buildMemoryChecks()
+{
+    m_memoriesToCheck.clear();
+    for (const auto& key : m_achievementsMemLists.keys())
+    {
+        m_memoriesToCheck.append(m_achievementsMemLists[key]);
     }
     std::sort(m_memoriesToCheck.begin(), m_memoriesToCheck.end(), [&](QPair<unsigned int, unsigned int> p1, QPair<unsigned int, unsigned int> p2) {
         return p1.first < p2.first;
@@ -115,7 +126,7 @@ QList<QPair<int, int> > *AchievementChecker::prepareCheck(QList<Achievement> &ac
     /*qDebug() << "==============================\n==========================\n";
     qDebug() << "Some mergin done" << m_memoriesToCheck;*/
     qDebug() << "Number of read " << m_memoriesToCheck.size();
-    qDebug() << "After build Address : " << QString::number(cheevosMemRefs[959]->memrefs->address, 16);
+    //qDebug() << "After build Address : " << QString::number(cheevosMemRefs[959]->memrefs->address, 16);
     return &m_memoriesToCheck;
 }
 
@@ -138,6 +149,29 @@ static uint32_t peek(uint32_t address, uint32_t num_bytes, void* ud) {
     return 0;
 }
 
+void AchievementChecker::free_memrefs_t(rc_condset_memrefs_t* mems)
+{
+    rc_memref_t* memrefs = mems->memrefs;
+    rc_value_t* variables = mems->variables;
+    while (memrefs != nullptr)
+    {
+        rc_memref_t* oldmem = memrefs;
+        memrefs = memrefs->next;
+        free(oldmem);
+    }
+    while (variables != nullptr)
+    {
+        rc_value_t* oldvar = variables;
+        variables = variables->next;
+        free(oldvar);
+    }
+}
+
+void AchievementChecker::free_condset_t(rc_condset_t *)
+{
+
+}
+
 void AchievementChecker::checkAchievements(const QByteArray& bdatas)
 {
     const char* datas = bdatas.constData();
@@ -148,15 +182,16 @@ void AchievementChecker::checkAchievements(const QByteArray& bdatas)
     {
         memcpy(virtualRAM + mem.first, datas + pos, mem.second);
     }
+    qDebug() << "Bomb memory : " << QString::number(virtualRAM[0xf343], 16);
     for (const auto& key : cheevosCondset.keys())
     {
-        qDebug() << "Checking " << key;
+        //qDebug() << "Checking " << key;
         rc_condset_t* condset = cheevosCondset[key];
         rc_condset_memrefs_t* memrefs = cheevosMemRefs[key];
         rc_eval_state_t eval_state;
 
-        qDebug() << "Checking memrefs->memrefs" << memrefs->memrefs;
-        qDebug() << "Check Address : " << QString::number(memrefs->memrefs->address, 16);
+        //qDebug() << "Checking memrefs->memrefs" << memrefs->memrefs;
+        //qDebug() << "Check Address : " << QString::number(memrefs->memrefs->address, 16);
         rc_update_memref_values(memrefs->memrefs, peek, virtualRAM);
         rc_update_variables(memrefs->variables, peek, virtualRAM, 0);
 
@@ -164,9 +199,17 @@ void AchievementChecker::checkAchievements(const QByteArray& bdatas)
         eval_state.peek = peek;
         eval_state.peek_userdata = virtualRAM;
 
+        //qDebug() << "WRAM at 0XF341" << QString::number(virtualRAM[0xF341], 16);
         int result = rc_test_condset(condset, &eval_state);
+        qDebug() << key << "Achievement result " << result;
         if (result == 1)
         {
+            m_achievementsMemLists.remove(key);
+            cheevosCondset.remove(key);
+            cheevosMemRefs.remove(key);
+            //free_memrefs_t(memrefs);
+            buildMemoryChecks();
+            exit (1);
             emit achievementCompleted(key);
         }
     }
@@ -176,5 +219,11 @@ QList<QPair<int, int> > *AchievementChecker::memoriesToCheck()
 {
     return &m_memoriesToCheck;
 }
+
+void AchievementChecker::printDebug(QString where)
+{
+    qDebug() << where << QString::number(cheevosMemRefs[959]->memrefs->address, 16);
+}
+
 
 

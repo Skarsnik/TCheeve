@@ -46,7 +46,8 @@ public:
     enum State {
         None,
         Connected,
-        Ready
+        Ready,
+        GettingFile
     };
     enum sd2snesState {
         sd2menu,
@@ -76,10 +77,12 @@ public:
     void                    setAppName(QString name);
     QByteArray              getAddress(unsigned int addr, unsigned int size, Space space = SNES);
     void                    getAsyncAddress(unsigned int addr, unsigned int size, Space space = SNES);
+    void                    getAsyncAddress(QList<QPair<int, int> > memories);
     const QByteArray&       getAsyncAdressData() const;
     void                    setAddress(unsigned int addr, QByteArray data, Space space = SNES);
     State                   state();
     QStringList             infos();
+    void                    getFile(QString path);
     bool                    legacyConnection();
     QString                 firmwareString();
     QVersionNumber          firmwareVersion();
@@ -87,6 +90,7 @@ public:
     QStringList             deviceList();
     QVersionNumber          serverVersion();
     bool                    patchROM(QString patch);
+    QByteArray              getFileData();
 
 signals:
     void    stateChanged();
@@ -97,6 +101,7 @@ signals:
     void    getAddressDataReceived();
     void    romStarted();
     void    menuStarted();
+    void    fileGet();
 
 
 private slots:
@@ -126,6 +131,8 @@ private:
     QString         lastTextMessage;
     unsigned int    requestedBinaryReadSize;
     bool            doingAsyncGetAddress;
+    unsigned int    m_fileGetDataSent;
+    unsigned int    m_fileSize;
 
     QTimer          timer;
 

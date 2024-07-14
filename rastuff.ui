@@ -15,10 +15,13 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QPushButton" name="pushButton">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>40</x>
-      <y>80</y>
+      <y>290</y>
       <width>75</width>
       <height>24</height>
      </rect>
@@ -32,8 +35,8 @@
      <rect>
       <x>230</x>
       <y>50</y>
-      <width>561</width>
-      <height>501</height>
+      <width>481</width>
+      <height>61</height>
      </rect>
     </property>
    </widget>
@@ -48,6 +51,32 @@
     </property>
     <property name="text">
      <string>NWA Status</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>80</y>
+      <width>201</width>
+      <height>181</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>This is like a pre alpha version. You don't need to login (it use my own) since it does not validate the achievement on RA website Just look at the bottom of the big text edit to see a achievement completed</string>
+    </property>
+    <property name="wordWrap">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QListWidget" name="listWidget">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>130</y>
+      <width>531</width>
+      <height>401</height>
+     </rect>
     </property>
    </widget>
   </widget>

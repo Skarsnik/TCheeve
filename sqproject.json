@@ -1,0 +1,10 @@
+{
+    "name" : "RAStuff",
+    "pro-file" : "RAStuff.pro",
+    "org" : "fr.nyo",
+    "short-description" : "plop",
+    "description" : "Plop",
+    "qt-major-version" : "qt6",
+    "icon" : "icon64x64.png",
+    "desktop-categories" : ["Utility"]
+}

@@ -2,11 +2,13 @@
 #define RASTUFF_H
 
 #include "achievementchecker.h"
+#include "achievementlistitem.h"
 #include "nwaccess.h"
 #include "ramanager.h"
 #include "usb2snes.h"
 
 #include <QMainWindow>
+#include <QTextToSpeech>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -40,12 +42,14 @@ private:
     NWAccess    nwaccess;
     RAManager   raManager;
     QTimer      checkInfoTimer;
+    QTextToSpeech*  tts;
 
     AchievementChecker*                     achChecker;
     QList<QPair<int, int> >*                memoriesToCheck;
 
     //QMap<unsigned int, TrackedMemory>       trackedMems;
-    QMap<unsigned int, const Achievement*>  achievementsToCheck;
+    QMap<unsigned int, const Achievement*>   achievementsToCheck;
+    QMap<unsigned int, AchievementListItem*> listAchWidget;
     char*                                   virtualRam;
     NWAGameInfos                            gameInfos;
 
@@ -54,5 +58,7 @@ private:
     void    achievementCompleted(int id);
     void    onGameInfosDone();
     void    onGetMemoriesDone();
+    void    setUsb2Snes();
+    void    usb2snesGameStarted(QString game);
 };
 #endif // RASTUFF_H

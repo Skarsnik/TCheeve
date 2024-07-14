@@ -1,5 +1,10 @@
 #include "achievementchecker.h"
 #include <QDebug>
+#include <QLoggingCategory>
+
+Q_LOGGING_CATEGORY(log_AchChecker, "RAManager")
+#define sDebug() qCDebug(log_AchChecker)
+#define sInfo() qCInfo(log_AchChecker)
 
 AchievementChecker::AchievementChecker(QObject *parent)
     : QObject{parent}
@@ -59,10 +64,10 @@ QList<QPair<int, int> > *AchievementChecker::prepareCheck(QList<Achievement> &ac
         cheevosTriggers[ach.id] = new_trigger;
         //rc_destroy_parse_state(&parse);
         rc_memref_t* m_next = new_trigger->memrefs;
-        qDebug() << "String : " << memaddr;
+        sDebug() << "String : " << memaddr;
         while (m_next != nullptr)
         {
-            qDebug() << "Address " << m_next->address;
+            sDebug() << "Address " << m_next->address;
             m_achievementsMemLists[ach.id].append(QPair<unsigned int, unsigned int>(m_next->address, sizeOfCheevosEnum(m_next->value.size)));
             //m_memoriesToCheck.append(QPair<unsigned int, unsigned int>(m_next->address, sizeOfCheevosEnum(m_next->value.size)));
             m_next = m_next->next;
@@ -94,8 +99,8 @@ QList<QPair<int, int> >* AchievementChecker::buildMemoryChecks()
             continue;
         }
     }
-    /*qDebug() << "Duplicate : " << m_memoriesToCheck;
-    qDebug() << "==============================\n==========================\n";*/
+    sInfo() << "Building memory to check";
+    sInfo() << "==============================\n==========================\n";
     for (unsigned int i = 0; i < m_memoriesToCheck.size() - 1; i++)
     {
         const auto& currentPair = m_memoriesToCheck.at(i);
@@ -110,10 +115,9 @@ QList<QPair<int, int> >* AchievementChecker::buildMemoryChecks()
             continue;
         }
     }
-    /*qDebug() << "==============================\n==========================\n";
-    qDebug() << "Some mergin done" << m_memoriesToCheck;*/
-    qDebug() << "Number of read " << m_memoriesToCheck.size();
-    //qDebug() << "After build Address : " << QString::number(cheevosMemRefs[959]->memrefs->address, 16);
+    sInfo() << "Some mergin done" << m_memoriesToCheck;
+    sInfo() << "==============================\n==========================\n";
+    sInfo() << "Number of read " << m_memoriesToCheck.size();
     return &m_memoriesToCheck;
 }
 
@@ -136,28 +140,6 @@ static uint32_t peek(uint32_t address, uint32_t num_bytes, void* ud) {
     return 0;
 }
 
-void AchievementChecker::free_memrefs_t(rc_condset_memrefs_t* mems)
-{
-    rc_memref_t* memrefs = mems->memrefs;
-    rc_value_t* variables = mems->variables;
-    while (memrefs != nullptr)
-    {
-        rc_memref_t* oldmem = memrefs;
-        memrefs = memrefs->next;
-        free(oldmem);
-    }
-    while (variables != nullptr)
-    {
-        rc_value_t* oldvar = variables;
-        variables = variables->next;
-        free(oldvar);
-    }
-}
-
-void AchievementChecker::free_condset_t(rc_condset_t *)
-{
-
-}
 
 void AchievementChecker::checkAchievements(const QByteArray& bdatas)
 {
@@ -169,15 +151,13 @@ void AchievementChecker::checkAchievements(const QByteArray& bdatas)
         memcpy(virtualRAM + mem.first, datas + pos, mem.second);
         pos += mem.second;
     }
-    //qDebug() << "Bomb memory : " << QString::number(virtualRAM[0xf343], 16);
     for (const auto& key : cheevosTriggers.keys())
     {
         rc_trigger_t* trigger = cheevosTriggers[key];
         rc_test_trigger(trigger, peek, virtualRAM, nullptr);
         if (trigger->state == RC_TRIGGER_STATE_TRIGGERED)
         {
-            qDebug() << "WRAM at f340" << QString::number(virtualRAM[0xf340], 16);
-            qDebug() << key << "Achievement achieved " << key;
+            sInfo() << key << "Achievement achieved " << key;
             m_achievementsMemLists.remove(key);
             cheevosTriggers.remove(key);
             buildMemoryChecks();

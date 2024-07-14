@@ -5,8 +5,14 @@
 #include <QUrlQuery>
 #include "ramanager.h"
 #include <QDebug>
+#include <QLoggingCategory>
+
+Q_LOGGING_CATEGORY(log_RAManager, "RAManager")
+#define sDebug() qCDebug(log_RAManager)
+#define sInfo() qCInfo(log_RAManager)
 
 const QString baseRequestUrl = "https://retroachievements.org/dorequest.php";
+
 
 RAManager::RAManager() : QObject()
 {
@@ -16,9 +22,9 @@ RAManager::RAManager() : QObject()
 
 void RAManager::networkReplyFinished(QNetworkReply* reply)
 {
-    qDebug() << reply->rawHeaderList();
+    sInfo() << reply->rawHeaderList();
     if (reply->error() != QNetworkReply::NoError)
-        qDebug() << reply->errorString();
+        sInfo() << reply->errorString();
     if (m_currentQuerry == "login")
     {
         if (reply->error() != QNetworkReply::NoError)
@@ -26,7 +32,7 @@ void RAManager::networkReplyFinished(QNetworkReply* reply)
             emit loginFailed();
         }
         const QByteArray data = reply->readAll();
-        qDebug() << data;
+        sInfo() << data;
         const QJsonObject jObj = QJsonDocument::fromJson(data).object();
         if (jObj.value("Success").toBool() == false)
         {
@@ -50,6 +56,7 @@ void RAManager::networkReplyFinished(QNetworkReply* reply)
     }
     if (m_currentQuerry == "gameid")
     {
+        sInfo() << data;
         emit gameIdGotten(jObj.value("GameID").toInt());
         return ;
     }
@@ -109,12 +116,12 @@ void RAManager::doPostRequest(QString function, QMap<QString, QString> keys)
     querry.addQueryItem("r", function);
     for (const QString& key : keys.keys())
     {
-        qDebug() << key << " : " << keys[key];
+        sDebug() << key << " : " << keys[key];
         querry.addQueryItem(key, QUrl::toPercentEncoding(keys[key]));
     }
     QByteArray content = querry.query().toLocal8Bit();
     m_currentQuerry = function;
-    qDebug() << request.url() << " - " << content;
+    sInfo() << request.url() << " - " << content;
     networkManager.post(request, content);
 }
 

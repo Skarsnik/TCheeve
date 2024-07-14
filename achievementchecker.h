@@ -40,8 +40,6 @@ private:
     QMap<unsigned int, rc_condset_memrefs_t*>   cheevosMemRefs;
     QMap<unsigned int, rc_trigger_t*>           cheevosTriggers;
 
-    void free_memrefs_t(rc_condset_memrefs_t*);
-    void free_condset_t(rc_condset_t*);
     QList<QPair<int, int> > * buildMemoryChecks();
 };
 

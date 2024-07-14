@@ -2,42 +2,31 @@
 #include "ui_rastuff.h"
 #include <logindialog.h>
 
+#include <QLoggingCategory>
+
+Q_LOGGING_CATEGORY(log_RAStuff, "RAStuff")
+#define sDebug() qCDebug(log_RAStuff)
+#define sInfo() qCInfo(log_RAStuff)
+
 RAStuff::RAStuff(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::RAStuff)
 {
     ui->setupUi(this);
+    tts = new QTextToSpeech(this);
     achChecker = new AchievementChecker(this);
     connect(achChecker, &AchievementChecker::achievementCompleted, this, &RAStuff::achievementCompleted);
-    //doRegularLogin("Skarsnik", "gobbla42");
+    doRegularLogin("Skarsnik", "gobbla42");
+    setUsb2Snes();
     connect(&raManager, &RAManager::loginSuccess, this, [=] {
-        nwaccess.connectToHost();
+        //nwaccess.connectToHost();
+        usb2snes.connect();
     });
     connect(&raManager, &RAManager::gameIdGotten, this, [=] (int gameId) {
         raManager.getGameInfos(gameId);
     });
     connect(&raManager, &RAManager::gameInfosDone, this, &RAStuff::onGameInfosDone);
     connect(&nwaccess, &NWAccess::getMemoriesDone, this, &RAStuff::onGetMemoriesDone);
-    /*
-    usb2snes.connect();
-    QTimer::singleShot(500, this, [=] {
-        if (usb2snes.state() == USB2snes::None)
-        {
-            usb2snes.connect();
-        }
-    });
-    connect(&usb2snes, &USB2snes::stateChanged, this, &RAStuff::onUsb2SnesStateChanged);
-    connect(&usb2snes, &USB2snes::infoReceived, this, [=](Usb2SnesInfo infos) {
-        if (infos.isMenu == false)
-        {
-            checkInfoTimer.stop();
-            gameStarted(infos.romPlayed);
-        }
-    });
-    checkInfoTimer.setInterval(500);
-    connect(&checkInfoTimer, &QTimer::timeout, this, [=] {
-        usb2snes.infos();
-    });*/
 
     connect(&nwaccess, &NWAccess::ready, this, [=] {
         ui->nwaStatusLabel->setText("Connected to " + nwaccess.emulatorInfos().name);
@@ -64,35 +53,83 @@ RAStuff::RAStuff(QWidget *parent)
             auto domains = nwaccess.memoriesDomains();
             for (const auto& d : domains)
             {
-                qDebug() << d.name << d.size;
+                sInfo() << d.name << d.size;
                 if (d.name == "WRAM")
                     achChecker->allocRAM(d.size);
             }
             gameStarted(gameInfos.file);
         });
     checkInfoTimer.setInterval(500);
+    auto voices = tts->availableVoices();
+    quint32 rvalue = QRandomGenerator::global()->generate();
+    tts->setVoice(voices[rvalue % voices.size()]);
+    tts->say("RA Stuff started");
+}
+
+void RAStuff::setUsb2Snes()
+{
+    //usb2snes.connect();
+    achChecker->allocRAM(0x20000);
+    QTimer::singleShot(500, this, [=] {
+        if (usb2snes.state() == USB2snes::None)
+        {
+            usb2snes.connect();
+        }
+    });
+    connect(&usb2snes, &USB2snes::stateChanged, this, &RAStuff::onUsb2SnesStateChanged);
+    connect(&usb2snes, &USB2snes::infoReceived, this, [=](Usb2SnesInfo infos) {
+        if (infos.isMenu == false)
+        {
+            checkInfoTimer.stop();
+            usb2snesGameStarted(infos.romPlayed);
+        }
+    });
+    checkInfoTimer.setInterval(500);
+    connect(&checkInfoTimer, &QTimer::timeout, this, [=] {
+        usb2snes.infos();
+    });
+    connect(&usb2snes, &USB2snes::fileGet, this, [=] {
+        QByteArray romData = usb2snes.getFileData();
+        if (romData.size() & 512)
+            romData = romData.mid(512);
+        QString md5 = QCryptographicHash::hash(romData, QCryptographicHash::Md5).toHex();
+        raManager.getGameId(md5);
+    });
+    connect(&usb2snes, &USB2snes::getAddressDataReceived, this, [=] {
+        achChecker->checkAchievements(usb2snes.getAsyncAdressData());
+        usb2snes.getAsyncAddress(*memoriesToCheck);
+    });
+}
+
+void RAStuff::usb2snesGameStarted(QString game)
+{
+    usb2snes.getFile(game);
 }
 
 void RAStuff::onGameInfosDone()
 {
-    qDebug() << "RA Manager finished game infos";
+    sInfo() << "RA Manager finished game infos";
     QString text;
     text += "Game Tile : " + raManager.gameInfos.title + "\n\n";
     text += "Achievements : \n";
     memoriesToCheck = achChecker->prepareCheck(raManager.gameInfos.achievements);
-    achChecker->printDebug("After prepare check call");
+    sInfo() << "Displaying achievement list";
+    ui->listWidget->clear();
     for (const auto& ach : raManager.gameInfos.achievements)
     {
+        AchievementListItem* newListItem = new AchievementListItem(ach.title, ach.description, ui->listWidget);
+        listAchWidget[ach.id] = newListItem;
+        auto p = new QListWidgetItem();
+        p->setSizeHint(newListItem->sizeHint());
+        ui->listWidget->addItem(p);
+        ui->listWidget->setItemWidget(p, newListItem);
         achievementsToCheck[ach.id] = &ach;
         text += "Name : " + ach.title + "\n";
         text += "\tDescription : " + ach.description + "\n";
     }
-    achChecker->printDebug("Before get memories");
-    nwaccess.getMemories(*memoriesToCheck);
-    achChecker->printDebug("After get memories");
+    //nwaccess.getMemories(*memoriesToCheck);
+    usb2snes.getAsyncAddress(*memoriesToCheck);
     ui->plainTextEdit->setPlainText(text);
-    achChecker->printDebug("End of GameInfo done");
-
 }
 
 void RAStuff::onGetMemoriesDone()
@@ -142,7 +179,7 @@ void RAStuff::gameStarted(QString romPath)
     }
     if (gameFile.open(QIODevice::ReadOnly) == false)
     {
-        qDebug() << "Error with file";
+        sInfo() << "Error with file";
         return ;
     }
     QByteArray romData = gameFile.readAll();
@@ -154,11 +191,14 @@ void RAStuff::gameStarted(QString romPath)
 
 void RAStuff::achievementCompleted(int id)
 {
-    ui->plainTextEdit->appendPlainText("Achievement completed !" + achievementsToCheck[id]->title);
+    ui->plainTextEdit->appendPlainText("Achievement completed ! " + achievementsToCheck[id]->title);
+    sInfo() << "Achievement completed " << achievementsToCheck[id]->title;
+    tts->say("Achievement completed : " + achievementsToCheck[id]->title);
     if (nwaccess.hasMessage())
     {
-        nwaccess.message("Achievement completed !" + achievementsToCheck[id]->title);
+        nwaccess.message("Achievement completed ! " + achievementsToCheck[id]->title);
     }
+    listAchWidget[id]->setDone();
 }
 
 

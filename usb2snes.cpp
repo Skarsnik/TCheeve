@@ -197,10 +197,17 @@ void USB2snes::onWebSocketTextReceived(QString message)
         infos.isMenu = false;
         infos.version = infosStr.at(0);
         infos.romPlayed = infosStr.at(2);
-        if (infos.romPlayed == "/sd2snes/menu.bin" || infos.romPlayed == "/sd2snes/m3nu.bin")
+        if (infos.romPlayed.startsWith("/sd2snes/menu.bin") || infos.romPlayed.startsWith("/sd2snes/m3nu.bin"))
             infos.isMenu = true;
         emit infoReceived(infos);
         return;
+    }
+    if (m_lastCommande == "GetFile")
+    {
+        QStringList result = getJsonResults(message);
+        bool    ok;
+        m_fileSize = result.at(0).toUInt(&ok, 16);
+        requestedBinaryReadSize = m_fileSize;
     }
     emit textMessageReceived();
 }
@@ -223,6 +230,15 @@ void USB2snes::onWebSocketBinaryReceived(QByteArray message)
             m_istate = IReady;
             doingAsyncGetAddress = false;
             emit getAddressDataReceived();
+        }
+        if (m_lastCommande == "GetAddress" && doingAsyncGetAddress == false)
+        {
+            m_istate = IReady;
+            emit getAddressDataReceived();
+        }
+        if (m_lastCommande == "GetFile")
+        {
+            emit fileGet();
         }
         buffer.clear();
     }
@@ -304,6 +320,28 @@ void USB2snes::getAsyncAddress(unsigned int addr, unsigned int size, Space space
     requestedBinaryReadSize = size;
 }
 
+void USB2snes::getAsyncAddress(QList<QPair<int, int> > memories)
+{
+    // We can only send 8 addresses at a time
+    m_istate = IBusy;
+    unsigned int total_size = 0;
+    QStringList operands;
+    for (auto &pair : memories)
+    {
+        total_size += pair.second;
+        operands.append(QString::number(pair.first + 0xF50000, 16));
+        operands.append(QString::number(pair.second, 16));
+        if (operands.size() == 16)
+        {
+            sendRequest("GetAddress", operands);
+            operands.clear();
+        }
+    }
+    if (operands.isEmpty() == false)
+        sendRequest("GetAddress", operands);
+    requestedBinaryReadSize = total_size;
+}
+
 const QByteArray& USB2snes::getAsyncAdressData() const
 {
     return lastBinaryMessage;
@@ -342,6 +380,11 @@ bool USB2snes::patchROM(QString patch)
         return true;
     }
     return false;
+}
+
+QByteArray USB2snes::getFileData()
+{
+    return lastBinaryMessage;
 }
 
 
@@ -390,4 +433,13 @@ QStringList USB2snes::deviceList()
 QVersionNumber USB2snes::serverVersion()
 {
     return m_serverVersion;
+}
+
+void    USB2snes::getFile(QString path)
+{
+    sendRequest("GetFile", QStringList() << path);
+    m_istate = IBusy;
+    m_fileGetDataSent = 0;
+    m_fileSize = 0;
+    changeState(GettingFile);
 }

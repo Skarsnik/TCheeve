@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/img">
+        <file>kottshicken.png</file>
+        <file>mykottShicken.png</file>
+    </qresource>
+</RCC>

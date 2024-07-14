@@ -1,4 +1,4 @@
-QT       += core gui network websockets
+QT       += core gui network websockets texttospeech
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -9,6 +9,8 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 include(EmuNWAccess-qt.pri)
+include(SkarsnikQtCommon/Logs/sqlogging.pri)
+include(SkarsnikQtCommon/SQApplication/SQApplication.pri)
 
 INCLUDEPATH += rcheevos
 
@@ -16,6 +18,7 @@ INCLUDEPATH += rcheevos
 
 SOURCES += \
     achievementchecker.cpp \
+    achievementlistitem.cpp \
     logindialog.cpp \
     main.cpp \
     nwaccess.cpp \
@@ -36,6 +39,7 @@ SOURCES += \
 
 HEADERS += \
     achievementchecker.h \
+    achievementlistitem.h \
     logindialog.h \
     nwaccess.h \
     ramanager.h \
@@ -52,8 +56,18 @@ HEADERS += \
     usb2snes.h
 
 DEFINES += RC_DISABLE_LUA
+DEFINES += SQPROJECT_DEVEL
+
+RC_FILE = RAStuff.rc
 
 FORMS += \
+    achievementlistitem.ui \
     logindialog.ui \
     rastuff.ui
+
+DISTFILES += \
+    sqproject.json
+
+RESOURCES += \
+    rastuff.qrc
 

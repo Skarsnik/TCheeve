@@ -112,10 +112,10 @@ void RAStuff::onGameInfosDone()
     QString text;
     text += "Game Tile : " + raManager.gameInfos.title + "\n\n";
     text += "Achievements : \n";
-    memoriesToCheck = achChecker->prepareCheck(raManager.gameInfos.achievements);
+    memoriesToCheck = achChecker->prepareCheck(raManager.gameInfos.rawAchievements);
     sInfo() << "Displaying achievement list";
     ui->listWidget->clear();
-    for (const auto& ach : raManager.gameInfos.achievements)
+    for (const auto& ach : raManager.gameInfos.rawAchievements)
     {
         AchievementListItem* newListItem = new AchievementListItem(ach.title, ach.description, ui->listWidget);
         listAchWidget[ach.id] = newListItem;

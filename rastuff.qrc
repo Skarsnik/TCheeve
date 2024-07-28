@@ -3,4 +3,8 @@
         <file>kottshicken.png</file>
         <file>mykottShicken.png</file>
     </qresource>
+    <qresource prefix="/">
+        <file>QML-Ui/Main.qml</file>
+        <file>QML-Ui/MainScreen.ui.qml</file>
+    </qresource>
 </RCC>

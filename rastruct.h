@@ -4,7 +4,9 @@
 #include <QString>
 #include <QList>
 
+struct RawAchievement;
 struct Achievement;
+#include <QDateTime>
 
 struct UserInfos {
     QString userName;
@@ -16,15 +18,12 @@ struct UserInfos {
 
 struct GameInfos {
     unsigned int id;
+    QString hash;
     QString title;
     QString imageIcon;
     QString imageIconUrl;
-    QList<Achievement> achievements;
-};
-
-enum class MemCheckOp
-{
-    EQUAL
+    QList<RawAchievement> rawAchievements;
+    //QList<Achievement> achievements;
 };
 
 
@@ -36,8 +35,8 @@ enum class MemCheckOp
  * "BadgeLockedURL":"https:\/\/media.retroachievements.org\/Badge\/01183_lock.png"}
  */
 
-
-struct Achievement {
+// This is the class built from what the server send you
+struct RawAchievement {
     unsigned int    id;
     QString         title;
     QString         description;
@@ -45,9 +44,18 @@ struct Achievement {
     unsigned int    points;
     QString         badgeName;
     QString         category;
+    QDateTime       createdDate;
+    QString         badgeUrl;
+    QString         badgeLockedUrl;
+    QDateTime       createdTime;
+    QDateTime       modifiedTime;
+    unsigned int    rarity;
+    unsigned int    rarityHardcore;
+
     unsigned int    flags; //TODO
     unsigned int    type;
     QString         memAddrString;
 };
+
 
 #endif // RASTRUCT_H

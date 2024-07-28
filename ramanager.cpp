@@ -17,6 +17,7 @@ const QString baseRequestUrl = "https://retroachievements.org/dorequest.php";
 RAManager::RAManager() : QObject()
 {
     connect(&networkManager, &QNetworkAccessManager::finished, this, &RAManager::networkReplyFinished);
+    getImage = false;
 }
 
 
@@ -25,6 +26,12 @@ void RAManager::networkReplyFinished(QNetworkReply* reply)
     sInfo() << reply->rawHeaderList();
     if (reply->error() != QNetworkReply::NoError)
         sInfo() << reply->errorString();
+    if (getImage)
+    {
+        imageData = reply->readAll();
+        emit achievementImageGotten();
+        return ;
+    }
     if (m_currentQuerry == "login")
     {
         if (reply->error() != QNetworkReply::NoError)
@@ -66,10 +73,11 @@ void RAManager::networkReplyFinished(QNetworkReply* reply)
         gameInfos.title = jObjPD.value("Title").toString();
         gameInfos.imageIcon = jObjPD.value("ImageIcon").toString();
         gameInfos.imageIconUrl = jObjPD.value("ImageIconUrl").toString();
+        gameInfos.rawAchievements.clear();
         QJsonArray jAchs = jObjPD.value("Achievements").toArray();
         for (const auto& jAch : jAchs)
         {
-            Achievement a;
+            RawAchievement a;
             QJsonObject jAchObj = jAch.toObject();
             a.author = jAchObj.value("Author").toString();
             a.title = jAchObj.value("Title").toString();
@@ -79,16 +87,83 @@ void RAManager::networkReplyFinished(QNetworkReply* reply)
             a.points = jAchObj.value("Points").toInt();
             a.category = jAchObj.value("Category").toString();
             a.type = jAchObj.value("Type").toInt(0);
+            a.badgeUrl = jAchObj.value("BadgeURL").toString();
+            a.badgeLockedUrl = jAchObj.value("BadgeLockedURL").toString();
+            a.badgeName = jAchObj.value("BadgeName").toString();
             a.memAddrString = jAchObj.value("MemAddr").toString();
-            gameInfos.achievements.append(a);
+            gameInfos.rawAchievements.append(a);
         }
         emit gameInfosDone();
         return ;
     }
+    /*
+     *    {"Success":true,"Unlocks":[{"ID":947,"When":1721336194}],"ServerNow":1721642272}
+    */
+    if (m_currentQuerry == "startsession")
+    {
+        startSessionDatas.clear();
+        auto array = jObj.value("Unlocks").toArray();
+        for (unsigned int i = 0; i < array.size(); i++)
+        {
+            const QJsonObject oUnlock = array[i].toObject();
+            startSessionDatas[oUnlock.value("ID").toInt()] = QDateTime::QDateTime::fromSecsSinceEpoch(oUnlock.value("ID").toInteger());
+        }
+        emit startSessionDone();
+        return ;
+    }
+    /*
+      {"Success":true,"UserUnlocks":[],"GameID":337,"HardcoreMode":true}
+      {"Success":true,"UserUnlocks":[947],"GameID":337,"HardcoreMode":false}
+     **/
+    if (m_currentQuerry == "unlocks")
+    {
+        unlocks.clear();
+        auto array = jObj.value("UserUnlocks").toArray();
+        for (unsigned int i = 0; i < array.size(); i++)
+        {
+            unlocks.append(array[i].toInt());
+        }
+        emit unlocksGotten();
+        return ;
+    }
 }
 
+void RAManager::startSession()
+{
+    doPostRequest("startsession", QMap<QString, QString>({
+                                {"u", userInfos.userName},
+                                {"t", userInfos.authToken},
+                                {"g", QString::number(gameInfos.id)},
+                                {"m", gameInfos.hash}}));
+}
 
+void RAManager::awardAchievement(unsigned int id, bool hardcore)
+{
+    doPostRequest("awardachievement", QMap<QString, QString>({
+                                    {"u", userInfos.userName},
+                                    {"t", userInfos.authToken},
+                                    {"a", QString::number(id)},
+                                    {"h", QString::number(hardcore)}}));
+}
 
+void RAManager::getUnlocks(bool hardcore)
+{
+    doPostRequest("unlocks", QMap<QString, QString>({
+                                    {"u", userInfos.userName},
+                                    {"t", userInfos.authToken},
+                                    {"h", QString::number(hardcore)}}));
+}
+
+void RAManager::ping(QString message)
+{
+    doPostRequest("ping", QMap<QString, QString>({
+                                    {"r", message},
+                                    {"u", userInfos.userName},
+                                    {"t", userInfos.authToken},
+                                    {"g", QString::number(gameInfos.id)},
+                                    {"m", gameInfos.hash},
+                                    {"h", QString::number(1)}}));
+}
 
 void RAManager::regularLogin(const QString user, const QString password)
 {
@@ -99,11 +174,18 @@ void RAManager::regularLogin(const QString user, const QString password)
 void RAManager::getGameId(const QString md5hash)
 {
     doPostRequest("gameid", QMap<QString, QString>({{"m", md5hash}}));
+    gameInfos.hash = md5hash;
 }
 
 void RAManager::getGameInfos(const int gameId)
 {
     doPostRequest("patch", QMap<QString, QString>({{"u", userInfos.userName}, {"t", userInfos.authToken}, {"g", QString::number(gameId)}}));
+}
+
+void RAManager::getAchievementImages(const QString url)
+{
+    networkManager.get(QNetworkRequest(url));
+    getImage = true;
 }
 
 void RAManager::doPostRequest(QString function, QMap<QString, QString> keys)

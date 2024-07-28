@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MemoryViewer</class>
+ <widget class="QWidget" name="MemoryViewer">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>573</width>
+    <height>442</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout">
+   <item>
+    <widget class="QTextEdit" name="textEdit">
+     <property name="font">
+      <font>
+       <family>Courier New</family>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

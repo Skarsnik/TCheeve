@@ -8,12 +8,16 @@ Q_LOGGING_CATEGORY(log_AchChecker, "RAManager")
 
 AchievementChecker::AchievementChecker(QObject *parent)
     : QObject{parent}
-{}
+{
+    memView = new MemoryViewer();
+}
 
 void AchievementChecker::allocRAM(size_t size)
 {
     qDebug() << "Allocating virtual ram" << size;
-    virtualRAM = (char*) malloc(size * sizeof(char));
+    virtualRAM = (quint8*) malloc(size * sizeof(char));
+    memView->setVirtualRAM(virtualRAM);
+    memView->show();
 }
 
 static unsigned int sizeOfCheevosEnum(uint8_t memType)
@@ -43,36 +47,30 @@ static unsigned int sizeOfCheevosEnum(uint8_t memType)
     }
 }
 
-QList<QPair<int, int> > *AchievementChecker::prepareCheck(QList<Achievement> &achievements)
+QList<QPair<int, int> > *AchievementChecker::prepareCheck(QList<RawAchievement> &achievements)
 {
     cheevosCondset.clear();
     cheevosMemRefs.clear();
-    m_memrefs = (rc_memref_t*) malloc(sizeof(m_memrefs));
-    memset(m_memrefs, 0, sizeof(m_memrefs));
-    for (const Achievement& ach : achievements)
+
+    for (const RawAchievement& ach : achievements)
     {
+        /*if (ach.id != 947)
+            continue;*/
         QByteArray bTmp = ach.memAddrString.toLocal8Bit();
         const char* memaddr = bTmp.constData();
-        //rc_parse_state_t    parse;
         rc_trigger_t*       new_trigger;
         size_t              size_alloc = rc_trigger_size(memaddr);
         void*               trigger_buffer = malloc(size_alloc);
-        //rc_init_parse_state(&parse, trigger_buffer, nullptr, 0);
-        //parse.first_memref = 0;
-        //new_trigger = RC_ALLOC(rc_trigger_t, &parse);
         new_trigger = rc_parse_trigger(trigger_buffer, memaddr, NULL, 0);
         cheevosTriggers[ach.id] = new_trigger;
-        //rc_destroy_parse_state(&parse);
         rc_memref_t* m_next = new_trigger->memrefs;
-        sDebug() << "String : " << memaddr;
+        sDebug() << "String : " << memaddr << ach.id << ach.title;
         while (m_next != nullptr)
         {
-            sDebug() << "Address " << m_next->address;
+            sDebug() << "\t Address " << m_next->address;
             m_achievementsMemLists[ach.id].append(QPair<unsigned int, unsigned int>(m_next->address, sizeOfCheevosEnum(m_next->value.size)));
-            //m_memoriesToCheck.append(QPair<unsigned int, unsigned int>(m_next->address, sizeOfCheevosEnum(m_next->value.size)));
             m_next = m_next->next;
         }
-        //printDebug("Build achievement");
     }
     return buildMemoryChecks();
 }
@@ -118,13 +116,14 @@ QList<QPair<int, int> >* AchievementChecker::buildMemoryChecks()
     sInfo() << "Some mergin done" << m_memoriesToCheck;
     sInfo() << "==============================\n==========================\n";
     sInfo() << "Number of read " << m_memoriesToCheck.size();
+    memView->setMemoryArea(m_memoriesToCheck);
     return &m_memoriesToCheck;
 }
 
 
 static uint32_t peek(uint32_t address, uint32_t num_bytes, void* ud) {
 
-    const char* mem = (const char*) ud;
+    const quint8* mem = (const quint8*) ud;
     switch (num_bytes) {
     case 1: return mem[address];
 
@@ -144,6 +143,7 @@ static uint32_t peek(uint32_t address, uint32_t num_bytes, void* ud) {
 void AchievementChecker::checkAchievements(const QByteArray& bdatas)
 {
     const char* datas = bdatas.constData();
+    //static int nbHits = 0;
 
     unsigned int pos = 0;
     for (const auto& mem : m_memoriesToCheck)
@@ -151,10 +151,18 @@ void AchievementChecker::checkAchievements(const QByteArray& bdatas)
         memcpy(virtualRAM + mem.first, datas + pos, mem.second);
         pos += mem.second;
     }
+    memView->memoryUpdated();
     for (const auto& key : cheevosTriggers.keys())
     {
         rc_trigger_t* trigger = cheevosTriggers[key];
         rc_test_trigger(trigger, peek, virtualRAM, nullptr);
+        /*if (virtualRAM[0x57f] == 0x90)
+            nbHits++;
+        if (virtualRAM[0x57f] == 0x90)
+        {
+            sDebug() << "Hit the 0x57f == 0x90" << nbHits;
+        }*/
+        TriggerState state = static_cast<TriggerState>(trigger->state);
         if (trigger->state == RC_TRIGGER_STATE_TRIGGERED)
         {
             sInfo() << key << "Achievement achieved " << key;

@@ -48,7 +48,7 @@ private:
     QList<QPair<int, int> >*                memoriesToCheck;
 
     //QMap<unsigned int, TrackedMemory>       trackedMems;
-    QMap<unsigned int, const Achievement*>   achievementsToCheck;
+    QMap<unsigned int, const RawAchievement*>   achievementsToCheck;
     QMap<unsigned int, AchievementListItem*> listAchWidget;
     char*                                   virtualRam;
     NWAGameInfos                            gameInfos;

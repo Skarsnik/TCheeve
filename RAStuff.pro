@@ -1,4 +1,4 @@
-QT       += core gui network websockets texttospeech
+QT       += core gui network websockets texttospeech qml
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -19,9 +19,13 @@ INCLUDEPATH += rcheevos
 SOURCES += \
     achievementchecker.cpp \
     achievementlistitem.cpp \
+    achievementmodel.cpp \
     logindialog.cpp \
     main.cpp \
+    memoryviewer.cpp \
+    memoryviewwidget.cpp \
     nwaccess.cpp \
+    raengine.cpp \
     ramanager.cpp \
     rastuff.cpp \
     rcheevos/condition.c \
@@ -40,8 +44,12 @@ SOURCES += \
 HEADERS += \
     achievementchecker.h \
     achievementlistitem.h \
+    achievementmodel.h \
     logindialog.h \
+    memoryviewer.h \
+    memoryviewwidget.h \
     nwaccess.h \
+    raengine.h \
     ramanager.h \
     rastruct.h \
     rastuff.h \
@@ -53,6 +61,7 @@ HEADERS += \
     rcheevos/rc_export.h \
     rcheevos/rc_compat.h \
     rcheevos/rc_consoles.h \
+    sharedstruct.h \
     usb2snes.h
 
 DEFINES += RC_DISABLE_LUA
@@ -63,10 +72,12 @@ RC_FILE = RAStuff.rc
 FORMS += \
     achievementlistitem.ui \
     logindialog.ui \
+    memoryviewer.ui \
     rastuff.ui
 
 DISTFILES += \
     sqproject.json
+
 
 RESOURCES += \
     rastuff.qrc

@@ -325,16 +325,32 @@ void USB2snes::getAsyncAddress(QList<QPair<int, int> > memories)
     // We can only send 8 addresses at a time
     m_istate = IBusy;
     unsigned int total_size = 0;
+    unsigned int size_cmd = 0;
     QStringList operands;
     for (auto &pair : memories)
     {
-        total_size += pair.second;
+        unsigned int size = pair.second;
+        total_size += size;
+        // Prevent from sending oversized, sd2snes limits to 255 * 8 bytes for vget
+        /*if (size_cmd != 0 && size_cmd + size > 255 * 8)
+        {
+            sendRequest("GetAddress", operands);
+            size_cmd = 0;
+            operands.clear();
+        }
+        if (size > 255)
+        {
+            sendRequest("GetAddress", QStringList() << QString::number(pair.first + 0xF50000, 16) << QString::number(size, 16));
+            continue;
+        }*/
+        size_cmd += size;
         operands.append(QString::number(pair.first + 0xF50000, 16));
-        operands.append(QString::number(pair.second, 16));
+        operands.append(QString::number(size, 16));
         if (operands.size() == 16)
         {
             sendRequest("GetAddress", operands);
             operands.clear();
+            size_cmd = 0;
         }
     }
     if (operands.isEmpty() == false)

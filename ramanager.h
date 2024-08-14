@@ -5,12 +5,12 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
-class RAManager : public QObject
+class RAWebApiManager : public QObject
 {
     Q_OBJECT
 
 public:
-    RAManager();
+    RAWebApiManager(QObject *parent = nullptr);
     void    regularLogin(const QString user, const QString password);
     void    getGameId(const QString md5hash);
     void    getGameInfos(const int gameId);
@@ -35,8 +35,9 @@ signals:
     void    requestFailed();
     void    requestError();
     void    achievementImageGotten();
+    void    awardAchievementSuccess(unsigned int id);
     void    startSessionDone();
-    void    unlocksGotten();
+    void    unlocksGotten(bool hardcore);
 
 private:
     QNetworkAccessManager networkManager;
@@ -44,6 +45,7 @@ private:
     void    doPostRequest(QString function, QMap<QString, QString> keys);
     bool    getImage;
     QString m_currentQuerry;
+    QDateTime   startedRequetTime;
 
     void    networkReplyFinished(QNetworkReply* reply);
 };

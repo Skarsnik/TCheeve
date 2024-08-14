@@ -40,7 +40,7 @@ private:
     QString     login;
     USB2snes    usb2snes;
     NWAccess    nwaccess;
-    RAManager   raManager;
+    RAWebApiManager   raManager;
     QTimer      checkInfoTimer;
     QTextToSpeech*  tts;
 

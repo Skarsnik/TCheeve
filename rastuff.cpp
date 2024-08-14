@@ -18,14 +18,14 @@ RAStuff::RAStuff(QWidget *parent)
     connect(achChecker, &AchievementChecker::achievementCompleted, this, &RAStuff::achievementCompleted);
     doRegularLogin("Skarsnik", "gobbla42");
     setUsb2Snes();
-    connect(&raManager, &RAManager::loginSuccess, this, [=] {
+    connect(&raManager, &RAWebApiManager::loginSuccess, this, [=] {
         //nwaccess.connectToHost();
         usb2snes.connect();
     });
-    connect(&raManager, &RAManager::gameIdGotten, this, [=] (int gameId) {
+    connect(&raManager, &RAWebApiManager::gameIdGotten, this, [=] (int gameId) {
         raManager.getGameInfos(gameId);
     });
-    connect(&raManager, &RAManager::gameInfosDone, this, &RAStuff::onGameInfosDone);
+    connect(&raManager, &RAWebApiManager::gameInfosDone, this, &RAStuff::onGameInfosDone);
     connect(&nwaccess, &NWAccess::getMemoriesDone, this, &RAStuff::onGetMemoriesDone);
 
     connect(&nwaccess, &NWAccess::ready, this, [=] {

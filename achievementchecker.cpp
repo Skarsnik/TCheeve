@@ -17,7 +17,7 @@ void AchievementChecker::allocRAM(size_t size)
     qDebug() << "Allocating virtual ram" << size;
     virtualRAM = (quint8*) malloc(size * sizeof(char));
     memView->setVirtualRAM(virtualRAM);
-    memView->show();
+    //memView->show();
 }
 
 static unsigned int sizeOfCheevosEnum(uint8_t memType)
@@ -54,8 +54,8 @@ QList<QPair<int, int> > *AchievementChecker::prepareCheck(QList<RawAchievement> 
 
     for (const RawAchievement& ach : achievements)
     {
-        /*if (ach.id != 947)
-            continue;*/
+        if (ach.unlocked)
+            continue;
         QByteArray bTmp = ach.memAddrString.toLocal8Bit();
         const char* memaddr = bTmp.constData();
         rc_trigger_t*       new_trigger;
@@ -64,10 +64,10 @@ QList<QPair<int, int> > *AchievementChecker::prepareCheck(QList<RawAchievement> 
         new_trigger = rc_parse_trigger(trigger_buffer, memaddr, NULL, 0);
         cheevosTriggers[ach.id] = new_trigger;
         rc_memref_t* m_next = new_trigger->memrefs;
-        sDebug() << "String : " << memaddr << ach.id << ach.title;
+        //sDebug() << "String : " << memaddr << ach.id << ach.title;
         while (m_next != nullptr)
         {
-            sDebug() << "\t Address " << m_next->address;
+            //sDebug() << "\t Address " << m_next->address;
             m_achievementsMemLists[ach.id].append(QPair<unsigned int, unsigned int>(m_next->address, sizeOfCheevosEnum(m_next->value.size)));
             m_next = m_next->next;
         }

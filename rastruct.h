@@ -36,6 +36,7 @@ struct GameInfos {
  */
 
 // This is the class built from what the server send you
+
 struct RawAchievement {
     unsigned int    id;
     QString         title;
@@ -51,6 +52,7 @@ struct RawAchievement {
     QDateTime       modifiedTime;
     unsigned int    rarity;
     unsigned int    rarityHardcore;
+    bool            unlocked; // FIXME, should separate hardcore & softcore?
 
     unsigned int    flags; //TODO
     unsigned int    type;

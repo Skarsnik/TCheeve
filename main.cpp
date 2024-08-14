@@ -1,6 +1,5 @@
-#include "rastuff.h"
 
-
+#include "badgeimageprovider.h"
 #include "raengine.h"
 #include "sqlogging.h"
 #include <QQmlContext>
@@ -9,7 +8,7 @@
 #include <QLocale>
 #include <QTranslator>
 #include <QQmlApplicationEngine>
-#include "sharedstruct.h"
+
 
 
 int main(int argc, char *argv[])
@@ -20,10 +19,11 @@ int main(int argc, char *argv[])
     QLoggingCategory::setFilterRules("USB2SNES.debug=false");
 
     QQmlApplicationEngine engine;
-    RAEngine raEngine;
+    QScopedPointer<RAEngine> raEngine(new RAEngine);
 
     engine.addImportPath("qrc:/QML-Ui/");
-    engine.rootContext()->setContextProperty("mainEngine", &raEngine);
+    qmlRegisterSingletonInstance("fr.nyo.RAEngine", 1, 0, "MainEngine", raEngine.get());
+    engine.addImageProvider(QLatin1String("badges"), raEngine->bagdgeImageProvider());
     const QUrl url(QStringLiteral("qrc:/QML-Ui/Main.qml"));
     QObject::connect(
         &engine,

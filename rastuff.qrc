@@ -5,6 +5,8 @@
     </qresource>
     <qresource prefix="/">
         <file>QML-Ui/Main.qml</file>
-        <file>QML-Ui/MainScreen.ui.qml</file>
+        <file>QML-Ui/MainScreen.qml</file>
+        <file>QML-Ui/AchievementDelegate.qml</file>
+        <file>QML-Ui/TestModel.qml</file>
     </qresource>
 </RCC>

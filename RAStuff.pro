@@ -1,4 +1,4 @@
-QT       += core gui network websockets texttospeech qml
+QT       += core gui network websockets texttospeech qml quick
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -20,6 +20,7 @@ SOURCES += \
     achievementchecker.cpp \
     achievementlistitem.cpp \
     achievementmodel.cpp \
+    badgeimageprovider.cpp \
     logindialog.cpp \
     main.cpp \
     memoryviewer.cpp \
@@ -45,6 +46,7 @@ HEADERS += \
     achievementchecker.h \
     achievementlistitem.h \
     achievementmodel.h \
+    badgeimageprovider.h \
     logindialog.h \
     memoryviewer.h \
     memoryviewwidget.h \

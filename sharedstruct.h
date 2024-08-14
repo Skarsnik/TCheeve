@@ -11,7 +11,7 @@
 struct Achievement {
     Q_GADGET
 public:
-    Q_PROPERTY(unsigned int id MEMBER id)
+    Q_PROPERTY(unsigned int achId MEMBER id)
     Q_PROPERTY(QString title MEMBER title)
     Q_PROPERTY(QString description MEMBER description)
     Q_PROPERTY(QString author MEMBER author)
@@ -23,7 +23,6 @@ public:
     Q_PROPERTY(QDateTime unlockedTime MEMBER unlockedTime)
     Q_PROPERTY(QString badgeId MEMBER badgeId)
     Q_PROPERTY(QString badgeLockedId MEMBER badgeLockedId)
-
 
     unsigned int    id;
     QString         title;

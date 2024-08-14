@@ -23,7 +23,7 @@ RAEngine::RAEngine() {
     );
     skipBadges = false;
     connect(achievementChecker, &AchievementChecker::achievementCompleted, this, &RAEngine::achievementCompleted);
-    login("Skarsnik", "gobbla42");
+    //login("Skarsnik", "gobbla42");
 }
 
 
@@ -128,6 +128,7 @@ void RAEngine::setRAWebApiManager()
     connect(raWebAPIManager, &RAWebApiManager::loginSuccess, this, [=] {
         emit loginDone(true);
         setStatus(Status::WaitingForUsb2Snes);
+        m_achievements.clear();
         usb2snes->connect();
     });
     connect(raWebAPIManager, &RAWebApiManager::loginFailed, this, [=] {
@@ -220,7 +221,6 @@ void RAEngine::startSession()
     {
         m_achievementsModel->addAchievement(m_achievements[id]);
     }
-    m_achievementsModel->endInsert();
     sDebug() << "Done, starting the session";
     raWebAPIManager->startSession();
     pingTimer.start();

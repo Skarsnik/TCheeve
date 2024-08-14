@@ -3,16 +3,38 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import fr.nyo.RAEngine 1.0
 
+
+/*
+ This the 'real' main windows,
+ please use layout instead of hardcoded positionning
+ so it act sane when resizing the windows
+*/
 Rectangle {
-    width: 800
+    width: 600
     height: 600
+    LoginDialog {
+        id : loginDialog
+        onLoginDialogButtonClicked: MainEngine.login(login, password)
+        Connections {
+            target: MainEngine
+            function onLoginDone(success) {
+                if (success)
+                {
+                    loginDialog.accept();
+                } else {
+                    loginDialog.statusText = "Login failed";
+                }
+            }
+        }
+    }
 
-    GridLayout {
-        id: grid
-        anchors.fill: parent
-        rows: 2
-        columns: 2
-
+    Row {
+        spacing: 50
+        Button {
+            id: loginButton
+            text: qsTr("Login")
+            onClicked: () => loginDialog.open()
+        }
         Text {
             id : statusText
             text: {
@@ -28,35 +50,20 @@ Rectangle {
                     return qsTr("Session started, happy hunting")
                 }
             }
-            horizontalAlignment: Qt.AlignHCenter
-            Layout.row: 0
-            Layout.columnSpan: 2
-            Layout.column: 0
-            Layout.minimumHeight: 20
-            Layout.fillWidth: true
         }
-        Button {
-            Layout.row: 1
-            Layout.column: 0
-            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-            id: loginButton
-            text: qsTr("Login")
-        }
+    }
 
-        ListView {
-            id: achievementListView
-            Layout.row: 1
-            Layout.column: 1
-            Layout.alignment: Qt.AlignRight
-            Layout.preferredWidth: 400
-            //Layout.fillWidth: true
-            Layout.fillHeight: true
-            clip: true
-            boundsBehavior: Flickable.StopAtBounds
-            flickableDirection: Flickable.VerticalFlick
-            model: MainEngine.achievementsModel
-            ScrollBar.vertical: ScrollBar {}
-            delegate: AchievementDelegate {}
-        }
+    ListView {
+        id: achievementListView
+        clip: true
+        width: parent.width
+        height: 500
+        y : 50
+        x : 20
+        boundsBehavior: Flickable.StopAtBounds
+        flickableDirection: Flickable.VerticalFlick
+        model: MainEngine.achievementsModel
+        ScrollBar.vertical: ScrollBar {}
+        delegate: AchievementDelegate {}
     }
 }

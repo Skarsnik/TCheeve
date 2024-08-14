@@ -9,7 +9,7 @@ Window {
     height: mainScreen.height
 
     visible: true
-    title: "todelete"
+    title: "RAStuff - Yay"
 
     MainScreen {
         id: mainScreen
@@ -30,6 +30,7 @@ Window {
         }
         // When the logged request is done,
         // Check success to see if logged or not
+        // Note that the login dialog already use this
         function onLoginDone(success) {
 
         }

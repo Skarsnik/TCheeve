@@ -18,7 +18,6 @@ public:
     void                    addAchievement(Achievement* ach);
     void                    achievementUpdated(unsigned int id);
     void                    clear();
-    void                    endInsert();
 
 private:
     QList<Achievement*> m_achievements;

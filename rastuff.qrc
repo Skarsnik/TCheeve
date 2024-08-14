@@ -8,5 +8,6 @@
         <file>QML-Ui/MainScreen.qml</file>
         <file>QML-Ui/AchievementDelegate.qml</file>
         <file>QML-Ui/TestModel.qml</file>
+        <file>QML-Ui/LoginDialog.qml</file>
     </qresource>
 </RCC>

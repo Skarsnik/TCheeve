@@ -36,7 +36,9 @@ QHash<int, QByteArray> AchievementModel::roleNames() const
 
 void AchievementModel::addAchievement(Achievement *ach)
 {
+    beginInsertRows(index(m_achievements.size()), m_achievements.size(), m_achievements.size());
     m_achievements.append(ach);
+    endInsertRows();
 }
 
 void AchievementModel::achievementUpdated(unsigned int id)
@@ -55,11 +57,7 @@ void AchievementModel::achievementUpdated(unsigned int id)
 
 void AchievementModel::clear()
 {
+    beginResetModel();
     m_achievements.clear();
-    endResetModel();
-}
-
-void AchievementModel::endInsert()
-{
     endResetModel();
 }

@@ -33,7 +33,7 @@ public:
     Q_ENUM(Status)
     Q_PROPERTY(ConnectionStatus connectionStatus READ connectionStatus NOTIFY connectionStatusChanged FINAL)
     Q_PROPERTY(Status status READ status NOTIFY statusChanged FINAL)
-    Q_PROPERTY(AchievementModel* achievementsModel READ achievementsModel)
+    Q_PROPERTY(AchievementModel* achievementsModel READ achievementsModel FINAL)
     RAEngine();
 
     Q_INVOKABLE bool            login(QString username, QString password);

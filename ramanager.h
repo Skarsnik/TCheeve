@@ -12,6 +12,7 @@ class RAWebApiManager : public QObject
 public:
     RAWebApiManager(QObject *parent = nullptr);
     void    regularLogin(const QString user, const QString password);
+    void    tokenLogin(const QString username, const QString token);
     void    getGameId(const QString md5hash);
     void    getGameInfos(const int gameId);
     UserInfos userInfos;
@@ -23,9 +24,9 @@ public:
     void    getAchievementImages(const QString url);
     void    awardAchievement(unsigned int id, bool hardcore);
     void    getUnlocks(bool hardcore);
-    void    ping(QString message);
+    void    ping(QString message, bool hardcore);
 
-    void    startSession();
+    void    startSession(bool hardcore);
 
 signals:
     void    loginFailed();

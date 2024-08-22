@@ -6,6 +6,7 @@
 #include "ramanager.h"
 #include <QDebug>
 #include <QLoggingCategory>
+#include "rc_version.h"
 
 Q_LOGGING_CATEGORY(log_RAManager, "RAManager")
 #define sDebug() qCDebug(log_RAManager)
@@ -116,11 +117,15 @@ void RAWebApiManager::networkReplyFinished(QNetworkReply* reply)
     if (m_currentQuerry == "startsession")
     {
         startSessionDatas.clear();
-        auto array = jObj.value("Unlocks").toArray();
+        QJsonArray array;
+        if (jObj.contains("Unlocks"))
+            array = jObj.value("Unlocks").toArray();
+        if (jObj.contains("HardcoreUnlocks"))
+            array = jObj.value("HardcoreUnlocks").toArray();
         for (unsigned int i = 0; i < array.size(); i++)
         {
             const QJsonObject oUnlock = array[i].toObject();
-            startSessionDatas[oUnlock.value("ID").toInt()] = QDateTime::QDateTime::fromSecsSinceEpoch(oUnlock.value("ID").toInteger());
+            startSessionDatas[oUnlock.value("ID").toInt()] = QDateTime::QDateTime::fromSecsSinceEpoch(oUnlock.value("WHEN").toInteger());
         }
         emit startSessionDone();
         goto rfinished_end_and_delete;
@@ -157,13 +162,17 @@ rfinished_end_and_delete:
     reply->deleteLater();
 }
 
-void RAWebApiManager::startSession()
+// r=startsession&u=Skarsnik&t=88TrmuWJvnOCbw2g&g=355&h=1&m=608c22b8ff930c62dc2de54bcd6eba72&l=11.0
+
+void RAWebApiManager::startSession(bool hardcore)
 {
     doPostRequest("startsession", QMap<QString, QString>({
                                 {"u", userInfos.userName},
                                 {"t", userInfos.authToken},
                                 {"g", QString::number(gameInfos.id)},
-                                {"m", gameInfos.hash}}));
+                                {"m", gameInfos.hash},
+                                {"h", QString::number(hardcore)},
+                                {"l", RCHEEVOS_VERSION_STRING}}));
 }
 
 void RAWebApiManager::awardAchievement(unsigned int id, bool hardcore)
@@ -209,7 +218,7 @@ void RAWebApiManager::getUnlocks(bool hardcore)
  * r=ping&u=Skarsnik&t=88TrmuWJvnOCbw2g&g=355&m=Exploring+the+Light+World+%e2%80%a2+3+%e2%9d%a4%ef%b8%8f+%e2%80%a2+no+bottles&h=0&x=608c22b8ff930c62dc2de54bcd6eba72
                 {"Success":true}
 */
-void RAWebApiManager::ping(QString message)
+void RAWebApiManager::ping(QString message, bool hardcore)
 {
     doPostRequest("ping", QMap<QString, QString>({
                                     {"m", message},
@@ -217,13 +226,19 @@ void RAWebApiManager::ping(QString message)
                                     {"t", userInfos.authToken},
                                     {"g", QString::number(gameInfos.id)},
                                     {"x", gameInfos.hash},
-                                    {"h", QString::number(1)}}));
+                                    {"h", QString::number(hardcore)}}));
 }
 
 void RAWebApiManager::regularLogin(const QString user, const QString password)
 {
     userInfos.userName = user;
     doPostRequest("login", QMap<QString, QString>({{"u", user}, {"p", password}}));
+}
+
+void RAWebApiManager::tokenLogin(const QString username, const QString token)
+{
+    userInfos.userName = username;
+    doPostRequest("login", QMap<QString, QString>({{"u", username}, {"t", token}}));
 }
 
 void RAWebApiManager::getGameId(const QString md5hash)
@@ -265,7 +280,16 @@ void RAWebApiManager::doPostRequest(QString function, QMap<QString, QString> key
     // Cheevos use + for space, sigh
     content.replace("%20", "+");
     m_currentQuerry = function;
-    sInfo() << request.url() << " - " << content;
+    QByteArray contentToLog = content;
+    // To filter out real password from logs
+    if (function == "login")
+    {
+        querry.removeQueryItem("p");
+        querry.addQueryItem("p", "ThisIsNotAPasswordThisIsATribute");
+        contentToLog = querry.query(QUrl::EncodeUnicode | QUrl::EncodeSpaces).toLocal8Bit();
+        contentToLog.replace("%20", "+");
+    }
+    sInfo() << request.url() << " - " << contentToLog;
     networkManager.post(request, content);
 }
 

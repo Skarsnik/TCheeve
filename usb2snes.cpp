@@ -196,6 +196,7 @@ void USB2snes::onWebSocketTextReceived(QString message)
         Usb2SnesInfo infos;
         infos.isMenu = false;
         infos.version = infosStr.at(0);
+        infos.secondField = infosStr.at(1);
         infos.romPlayed = infosStr.at(2);
         if (infos.romPlayed.startsWith("/sd2snes/menu.bin") || infos.romPlayed.startsWith("/sd2snes/m3nu.bin"))
             infos.isMenu = true;

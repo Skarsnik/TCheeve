@@ -1,5 +1,4 @@
 
-#include "badgeimageprovider.h"
 #include "raengine.h"
 #include "sqlogging.h"
 #include <QQmlContext>
@@ -15,6 +14,11 @@ int main(int argc, char *argv[])
 {
     SQApplication a(argc, argv);
 
+    a.setApplicationName("RAStuff");
+    a.setOrganizationDomain("nyo.fr");
+    a.setOrganizationName("skarsnik.nyo.fr");
+    a.createSettings();
+    qDebug() << "Settings are stored in " << a.settings()->fileName();
     installSQLogging("logs.txt", "debug-log.txt", true);
     QLoggingCategory::setFilterRules("USB2SNES.debug=false");
 
@@ -57,6 +61,20 @@ void    fillAchievementList (RAEngine* engine)
     ach.badgeLockedId = "78_lock";
     engine->testAddAchievement(ach);
 
+    ach.id = 89;
+    ach.title = "Hardcore enjoyer";
+    ach.description = "Select hardcore mode";
+    ach.author = "Skarsnik";
+    ach.rarity = 0;
+    ach.rarityHardcore = 0;
+    ach.points = 4;
+    ach.unlocked = false;
+    ach.hardcoreUnlocked = true;
+    ach.unlockedTime = QDateTime::fromString("2024-07-25 20:00");
+    ach.badgeId = "89";
+    ach.badgeLockedId = "89_lock";
+    engine->testAddAchievement(ach);
+
     ach.id = 100;
     ach.title = "Praise the kottShicken";
     ach.description = "Praise the kottShicken once a day";
@@ -65,14 +83,15 @@ void    fillAchievementList (RAEngine* engine)
     ach.rarityHardcore = 0;
     ach.points = 4;
     ach.unlocked = true;
+    ach.hardcoreUnlocked = false;
     ach.unlockedTime = QDateTime::fromString("2024-06-20 20:00");
     ach.badgeId = "100";
     ach.badgeLockedId = "100_lock";
     engine->testAddAchievement(ach);
 
     ach.id = 200;
-    ach.title = "Praise the skarsShicken";
-    ach.description = "Praise the skarsShicken once a day";
+    ach.title = "Praise the skarsnShicken";
+    ach.description = "Praise the skarsnShicken once a day";
     ach.author = "Skarsnik";
     ach.rarity = 0;
     ach.rarityHardcore = 0;
@@ -85,7 +104,7 @@ void    fillAchievementList (RAEngine* engine)
 
     ach.id = 400;
     ach.title = "Give me the twitch money";
-    ach.description = "Subscribe to Skarsnikus twitch channel";
+    ach.description = "Subscribe to http://twitch.tv/skarsnikus";
     ach.author = "Skarsnik";
     ach.rarity = 0;
     ach.rarityHardcore = 0;

@@ -1,6 +1,4 @@
-QT       += core gui network websockets texttospeech qml quick
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QT       += widgets core gui network websockets texttospeech qml quick
 
 CONFIG += c++17
 
@@ -63,6 +61,7 @@ HEADERS += \
     rcheevos/rc_export.h \
     rcheevos/rc_compat.h \
     rcheevos/rc_consoles.h \
+    rcheevos/rc_version.h \
     sharedstruct.h \
     usb2snes.h
 

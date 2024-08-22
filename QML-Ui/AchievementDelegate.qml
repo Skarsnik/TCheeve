@@ -8,6 +8,7 @@ Check out https://doc.qt.io/qtcreator/creator-quick-ui-forms.html for details on
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts
+import fr.nyo.RAEngine;
 
 
 /*
@@ -42,7 +43,14 @@ Rectangle {
 
     width : 400
     height : 80
-    color: unlocked ? "yellow" : "white"
+    color: {
+        var munlocked = false;
+        if (MainEngine.hardcoreMode)
+            munlocked = hardcoreUnlocked;
+        else
+            munlocked = unlocked;
+        return munlocked ? "yellow" : "white"
+    }
     GridLayout {
         columns : 2
         rows : 2

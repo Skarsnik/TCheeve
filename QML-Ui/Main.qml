@@ -21,6 +21,7 @@ Window {
 
         // The session is started
         function onSessionStarted() {
+            mainScreen.hardcoreChoiceEnabled = false;
             tts.say("RetroAchievements session started");
         }
         // When an achievement is unlocked
@@ -32,7 +33,7 @@ Window {
         // Check success to see if logged or not
         // Note that the login dialog already use this
         function onLoginDone(success) {
-
+            mainScreen.logged = success
         }
     }
     TextToSpeech {

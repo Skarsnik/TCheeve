@@ -29,6 +29,7 @@
 
 struct Usb2SnesInfo {
     QString     version;
+    QString     secondField;
     QString     romPlayed;
     bool        isMenu;
     QStringList flags;

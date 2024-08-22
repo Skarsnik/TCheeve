@@ -9,7 +9,10 @@ import fr.nyo.RAEngine 1.0
  please use layout instead of hardcoded positionning
  so it act sane when resizing the windows
 */
+
 Rectangle {
+    property bool hardcoreChoiceEnabled : true
+    property bool logged : false
     width: 600
     height: 600
     LoginDialog {
@@ -32,6 +35,7 @@ Rectangle {
         spacing: 50
         Button {
             id: loginButton
+            enabled: logged === false
             text: qsTr("Login")
             onClicked: () => loginDialog.open()
         }
@@ -50,6 +54,15 @@ Rectangle {
                     return qsTr("Session started, happy hunting")
                 }
             }
+        }
+        CheckBox {
+            id: hardcoreCheckbox
+            checked: MainEngine.hardcoreMode
+            enabled: hardcoreChoiceEnabled;
+            onCheckedChanged: {
+                MainEngine.hardcoreMode = checked;
+            }
+            text : qsTr("Hardcore mode");
         }
     }
 

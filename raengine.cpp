@@ -1,3 +1,4 @@
+#include "sqapplication.h"
 #include "raengine.h"
 
 Q_LOGGING_CATEGORY(log_raEngine, "RAEngine")
@@ -15,20 +16,34 @@ RAEngine::RAEngine() {
     m_logged = false;
     setStatus(Status::None);
     setRAWebApiManager();
+    m_hardcoreMode = false;
     setConnectionStatus(ConnectionStatus::NotConnected);
     pingTimer.setInterval(30000);
     connect(&pingTimer, &QTimer::timeout, this, [=] {
-        raWebAPIManager->ping("I have no idea what going on");
+        raWebAPIManager->ping("I have no idea what going on", m_hardcoreMode);
     }
     );
     skipBadges = false;
     connect(achievementChecker, &AchievementChecker::achievementCompleted, this, &RAEngine::achievementCompleted);
     //login("Skarsnik", "gobbla42");
+    setRememberLogin(sqApp->settings()->value("login/RememberLogin").toBool());
+    setHardcoreMode(sqApp->settings()->value("general/hardcore").toBool());
+    if (m_rememberLogin)
+    {
+        if (sqApp->settings()->contains("login/Username") == false)
+            return;
+        QString userName = sqApp->settings()->value("login/Username").toString();
+        QString userToken = sqApp->settings()->value("login/Usertoken").toString();
+        QTimer::singleShot(0, this, [=] {
+            raWebAPIManager->tokenLogin(userName, userToken);
+        });
+    }
 }
 
 
 bool RAEngine::login(QString username, QString password)
 {
+    sInfo() << "Remember me :" << m_rememberLogin;
     raWebAPIManager->regularLogin(username, password);
     return false;
 }
@@ -64,6 +79,14 @@ void RAEngine::setStatus(Status status)
     emit statusChanged();
 }
 
+void RAEngine::checkHardcoreCompatible()
+{
+    if (usb2snesInfos.secondField == "SD2SNES")
+    {
+
+    }
+}
+
 void RAEngine::testAddAchievement(Achievement ach)
 {
     Achievement* newAch = new Achievement();
@@ -83,6 +106,7 @@ void RAEngine::setUsb2Snes()
     connect(&usb2snesCheckConnectedTimer, &QTimer::timeout, this, [=]{
         if (usb2snes->state() == USB2snes::None)
         {
+            sDebug() << "Usb2snes: Attempting to connect";
             usb2snes->connect();
         } else {
             usb2snesCheckConnectedTimer.stop();
@@ -94,9 +118,12 @@ void RAEngine::setUsb2Snes()
         {
             setConnectionStatus(ConnectionStatus::Connected);
             usb2snesCheckInfoTimer.start();
+            //usb2snes->infos();
         }
     });
     connect(usb2snes, &USB2snes::infoReceived, this, [=](Usb2SnesInfo infos) {
+        sDebug() << "Usb2snes Info received";
+        usb2snesInfos = infos;
         if (infos.isMenu == false)
         {
             usb2snesCheckInfoTimer.stop();
@@ -126,10 +153,17 @@ void RAEngine::setUsb2Snes()
 void RAEngine::setRAWebApiManager()
 {
     connect(raWebAPIManager, &RAWebApiManager::loginSuccess, this, [=] {
+        if (m_rememberLogin)
+        {
+            sqApp->settings()->setValue("login/Username", raWebAPIManager->userInfos.userName);
+            sqApp->settings()->setValue("login/RememberLogin", m_rememberLogin);
+            sqApp->settings()->setValue("login/Usertoken", raWebAPIManager->userInfos.authToken);
+        }
         emit loginDone(true);
         setStatus(Status::WaitingForUsb2Snes);
         m_achievements.clear();
         usb2snes->connect();
+        usb2snesCheckConnectedTimer.start();
     });
     connect(raWebAPIManager, &RAWebApiManager::loginFailed, this, [=] {
         emit loginDone(false);
@@ -205,7 +239,10 @@ void RAEngine::achievementCompleted(unsigned int id)
 {
     // We probably want to validate stuff when the server accept it?
     sInfo() << m_achievements[id]->title << " Achieved";
-    m_achievements[id]->unlocked = true;
+    if (m_hardcoreMode)
+        m_achievements[id]->hardcoreUnlocked = true;
+    else
+        m_achievements[id]->unlocked = true;
     m_achievements[id]->unlockedTime = QDateTime::currentDateTime();
     m_achievementsModel->achievementUpdated(id);
     raWebAPIManager->awardAchievement(id, false);
@@ -222,7 +259,7 @@ void RAEngine::startSession()
         m_achievementsModel->addAchievement(m_achievements[id]);
     }
     sDebug() << "Done, starting the session";
-    raWebAPIManager->startSession();
+    raWebAPIManager->startSession(m_hardcoreMode);
     pingTimer.start();
     usb2snes->getAsyncAddress(*achievementChecker->memoriesToCheck());
 }
@@ -230,4 +267,31 @@ void RAEngine::startSession()
 RAEngine::Status RAEngine::status() const
 {
     return m_status;
+}
+
+bool RAEngine::hardcoreMode() const
+{
+    return m_hardcoreMode;
+}
+
+void RAEngine::setHardcoreMode(bool newHardcoreMode)
+{
+    if (m_hardcoreMode == newHardcoreMode)
+        return;
+    sqApp->settings()->setValue("general/hardcore", newHardcoreMode);
+    m_hardcoreMode = newHardcoreMode;
+    emit hardcoreModeChanged();
+}
+
+bool RAEngine::rememberLogin() const
+{
+    return m_rememberLogin;
+}
+
+void RAEngine::setRememberLogin(bool newRememberLogin)
+{
+    if (m_rememberLogin == newRememberLogin)
+        return;
+    m_rememberLogin = newRememberLogin;
+    emit rememberLoginChanged();
 }

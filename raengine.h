@@ -33,7 +33,9 @@ public:
     Q_ENUM(Status)
     Q_PROPERTY(ConnectionStatus connectionStatus READ connectionStatus NOTIFY connectionStatusChanged FINAL)
     Q_PROPERTY(Status status READ status NOTIFY statusChanged FINAL)
-    Q_PROPERTY(AchievementModel* achievementsModel READ achievementsModel FINAL)
+    Q_PROPERTY(AchievementModel* achievementsModel READ achievementsModel CONSTANT FINAL)
+    Q_PROPERTY(bool rememberLogin READ rememberLogin WRITE setRememberLogin NOTIFY rememberLoginChanged FINAL)
+    Q_PROPERTY(bool hardcoreMode READ hardcoreMode WRITE setHardcoreMode NOTIFY hardcoreModeChanged FINAL)
     RAEngine();
 
     Q_INVOKABLE bool            login(QString username, QString password);
@@ -51,6 +53,12 @@ public:
 
     RAEngine::Status status() const;
 
+    bool hardcoreMode() const;
+    void setHardcoreMode(bool newHardcoreMode);
+
+    bool rememberLogin() const;
+    void setRememberLogin(bool newRememberLogin);
+
 signals:
     void    connectionStatusChanged();
     void    statusChanged();
@@ -58,6 +66,10 @@ signals:
     void    ready();
     void    loginDone(bool success);
     void    sessionStarted();
+
+    void hardcoreModeChanged();
+
+    void rememberLoginChanged();
 
 private:
     QMap<unsigned int, Achievement*>    m_achievements;
@@ -69,6 +81,7 @@ private:
     QTimer                              usb2snesCheckConnectedTimer;
     QTimer                              usb2snesCheckInfoTimer;
     USB2snes*                           usb2snes;
+    Usb2SnesInfo                        usb2snesInfos;
 
     QTimer                              pingTimer;
     bool                                m_logged;
@@ -77,9 +90,11 @@ private:
 
     QList<QString>                      badgesToDownload;
     bool                                skipBadges;
+    bool                                m_hardcoreMode;
 
     void    setAchievementModel(AchievementModel *newAchievementModel);
     void    setStatus(RAEngine::Status status);
+    void    checkHardcoreCompatible();
 
     void    setUsb2Snes();
     void    setRAWebApiManager();
@@ -88,6 +103,7 @@ private:
     void    achievementCompleted(unsigned int id);
     void    getBadges();
     void    startSession();
+    bool m_rememberLogin;
 };
 
 #endif // RAENGINE_H

@@ -8,6 +8,7 @@ Dialog {
     signal loginDialogButtonClicked();
     property string login : loginText.text
     property string password : passwordText.text
+    property bool   rememberMe : MainEngine.rememberLogin
     property string statusText : " "
 
     contentItem: Column {
@@ -35,6 +36,16 @@ Dialog {
                 echoMode: TextInput.Password
             }
         }
+        CheckBox {
+            text : qsTr("Remember me")
+            id: rememberLoginCheckBox
+            checked : rememberMe
+            onCheckedChanged: {
+                rememberMe = checked;
+                MainEngine.rememberLogin = checked;
+            }
+        }
+
         Text {
             text : statusText
             color : "red"

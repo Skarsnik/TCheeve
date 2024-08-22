@@ -6,5 +6,6 @@
     "description" : "Plop",
     "qt-major-version" : "qt6",
     "icon" : "icon64x64.png",
+    "qml-dir" : "QML-Ui",
     "desktop-categories" : ["Utility"]
 }

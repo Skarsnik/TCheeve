@@ -17,11 +17,9 @@ public:
     void    getGameInfos(const int gameId);
     UserInfos userInfos;
     GameInfos gameInfos;
-    QByteArray imageData;
     QMap<unsigned int, QDateTime>   startSessionDatas;
     QList<unsigned int>             unlocks;
 
-    void    getAchievementImages(const QString url);
     void    awardAchievement(unsigned int id, bool hardcore);
     void    getUnlocks(bool hardcore);
     void    ping(QString message, bool hardcore);
@@ -36,6 +34,7 @@ signals:
     void    requestFailed();
     void    requestError();
     void    achievementImageGotten();
+    void    achievementBadgeGotten(QString url);
     void    awardAchievementSuccess(unsigned int id);
     void    startSessionDone();
     void    unlocksGotten(bool hardcore);
@@ -44,7 +43,6 @@ private:
     QNetworkAccessManager networkManager;
 
     void    doPostRequest(QString function, QMap<QString, QString> keys);
-    bool    getImage;
     QString m_currentQuerry;
     QDateTime   startedRequetTime;
 

@@ -1,4 +1,6 @@
+#include <QFileInfo>
 #include <QLoggingCategory>
+#include <QNetworkReply>
 #include "badgeimageprovider.h"
 
 Q_LOGGING_CATEGORY(log_badgeImageProvider, "BadgeImageProvider")
@@ -18,6 +20,25 @@ QPixmap BadgeImageProvider::requestPixmap(const QString &id, QSize *size, const 
     }
     sDebug() << "Getting " << id;
     return badgePixmaps[id];
+}
+
+void BadgeImageProvider::getBadges(QStringList badges)
+{
+    imagesToProcessCount = badges.size();
+    for (const auto& url : badges)
+    {
+        QNetworkReply* reply = dlManager.get(QNetworkRequest(url));
+        connect(reply, &QNetworkReply::finished, this, [=] {
+            QByteArray imageData = reply->readAll();
+            QString badgeId = QFileInfo(reply->url().fileName()).baseName();
+            sDebug() << "Received data for " << badgeId << imageData.size();
+            addBadgePixmap(badgeId, imageData);
+            reply->deleteLater();
+            imagesToProcessCount--;
+            if (imagesToProcessCount == 0)
+                emit achievementBadgesReady();
+        });
+    }
 }
 
 void BadgeImageProvider::addBadgePixmap(const QString id, QByteArray data)

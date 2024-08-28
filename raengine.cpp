@@ -204,9 +204,12 @@ void RAEngine::setRAWebApiManager()
             {
                 startSession();
             } else {
-                raWebAPIManager->getAchievementImages(badgesToDownload.first());
+                m_badgeImageProvider->getBadges(badgesToDownload);
             }
         }
+    });
+    connect(m_badgeImageProvider, &BadgeImageProvider::achievementBadgesReady, this, [=]{
+          startSession();
     });
     connect(raWebAPIManager, &RAWebApiManager::startSessionDone, this, [=] {
         for (unsigned int id : raWebAPIManager->startSessionDatas.keys())
@@ -216,18 +219,6 @@ void RAEngine::setRAWebApiManager()
         }
         emit sessionStarted();
         setStatus(Status::SessionStarted);
-    });
-    connect(raWebAPIManager, &RAWebApiManager::achievementImageGotten, this, [=] {
-        QString badgeId = QFileInfo(QUrl(badgesToDownload.first()).fileName()).baseName();
-        sDebug() << badgeId << badgesToDownload.size();
-        m_badgeImageProvider->addBadgePixmap(badgeId, raWebAPIManager->imageData);
-        badgesToDownload.remove(0);
-        if (badgesToDownload.isEmpty())
-        {
-            startSession();
-        } else {
-            raWebAPIManager->getAchievementImages(badgesToDownload.first());
-        }
     });
     connect(raWebAPIManager, &RAWebApiManager::gameIdGotten, this, [=](int gameId) {
         setStatus(Status::GettingAchievementInfo);

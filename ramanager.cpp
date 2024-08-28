@@ -19,32 +19,25 @@ RAWebApiManager::RAWebApiManager(QObject *parent)
     : QObject{parent}
 {
     connect(&networkManager, &QNetworkAccessManager::finished, this, &RAWebApiManager::networkReplyFinished);
-    getImage = false;
 }
 
 
 void RAWebApiManager::networkReplyFinished(QNetworkReply* reply)
 {
     sDebug() << "Time for request" << startedRequetTime.msecsTo(QDateTime::currentDateTime());
+    if (reply->operation() == QNetworkAccessManager::GetOperation)
+        return ;
     sInfo() << reply->rawHeaderList();
     if (reply->error() != QNetworkReply::NoError)
         sInfo() << reply->errorString();
 
     const QByteArray data = reply->readAll();
-    if (m_currentQuerry != "patch" && getImage == false)
+    if (m_currentQuerry != "patch")
         sDebug() << data;
     const QJsonObject jObj = QJsonDocument::fromJson(data).object();
-    if (getImage == false && m_currentQuerry != "login" && (reply->error() != QNetworkReply::NoError || jObj.value("Success").toBool() == false))
+    if (m_currentQuerry != "login" && (reply->error() != QNetworkReply::NoError || jObj.value("Success").toBool() == false))
     {
         emit requestFailed();
-        goto rfinished_end_and_delete;
-    }
-    if (getImage)
-    {
-        sDebug() << "Image got";
-        imageData = data;
-        getImage = false;
-        emit achievementImageGotten();
         goto rfinished_end_and_delete;
     }
 
@@ -250,16 +243,6 @@ void RAWebApiManager::getGameId(const QString md5hash)
 void RAWebApiManager::getGameInfos(const int gameId)
 {
     doPostRequest("patch", QMap<QString, QString>({{"u", userInfos.userName}, {"t", userInfos.authToken}, {"g", QString::number(gameId)}}));
-}
-
-void RAWebApiManager::getAchievementImages(const QString url)
-{
-    sInfo() << "get" << url;
-    getImage = true;
-    startedRequetTime = QDateTime::currentDateTime();
-    QNetworkRequest request;
-    request.setHeader(QNetworkRequest::UserAgentHeader, "BizHawk/GIT master#1b961f248");
-    networkManager.get(QNetworkRequest(url));
 }
 
 void RAWebApiManager::doPostRequest(QString function, QMap<QString, QString> keys)

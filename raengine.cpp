@@ -184,6 +184,7 @@ void RAEngine::setRAWebApiManager()
             newAchievement->rarityHardcore = ach.rarityHardcore;
             newAchievement->unlocked = false;
             newAchievement->hardcoreUnlocked = false;
+            newAchievement->official = ach.flags == 3;
             badgesToDownload.append(ach.badgeUrl);
             badgesToDownload.append(ach.badgeLockedUrl);
             m_achievements[ach.id] = newAchievement;
@@ -235,7 +236,8 @@ void RAEngine::achievementCompleted(unsigned int id)
         m_achievements[id]->unlocked = true;
     m_achievements[id]->unlockedTime = QDateTime::currentDateTime();
     m_achievementsModel->achievementUpdated(id);
-    raWebAPIManager->awardAchievement(id, m_hardcoreMode);
+    if (m_achievements[id]->official)
+        raWebAPIManager->awardAchievement(id, m_hardcoreMode);
     emit achievementAchieved(*m_achievements[id]);
 }
 

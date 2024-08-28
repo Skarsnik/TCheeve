@@ -98,6 +98,7 @@ void RAWebApiManager::networkReplyFinished(QNetworkReply* reply)
             a.badgeLockedUrl = jAchObj.value("BadgeLockedURL").toString();
             a.badgeName = jAchObj.value("BadgeName").toString();
             a.memAddrString = jAchObj.value("MemAddr").toString();
+            a.flags = jAchObj.value("Flags").toInt();
             a.unlocked = false;
             gameInfos.rawAchievements.append(a);
         }

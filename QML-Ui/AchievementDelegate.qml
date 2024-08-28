@@ -29,6 +29,7 @@ Rectangle {
     required property date unlockedTime
     required property string badgeId
     required property string badgeLockedId
+    required property bool official
 
     width : 400
     height : 80

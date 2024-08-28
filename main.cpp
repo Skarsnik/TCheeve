@@ -1,5 +1,5 @@
 
-#include "raengine.h"
+#include "thankscheeveengine.h"
 #include "sqlogging.h"
 #include <QQmlContext>
 
@@ -8,13 +8,13 @@
 #include <QTranslator>
 #include <QQmlApplicationEngine>
 
-void    fillAchievementList (RAEngine* engine);
+void    fillAchievementList (ThanksCheeveEngine* engine);
 
 int main(int argc, char *argv[])
 {
     SQApplication a(argc, argv);
 
-    a.setApplicationName("RAStuff");
+    a.setApplicationName("TCheeve");
     a.setOrganizationDomain("nyo.fr");
     a.setOrganizationName("skarsnik.nyo.fr");
     a.createSettings();
@@ -23,11 +23,11 @@ int main(int argc, char *argv[])
     QLoggingCategory::setFilterRules("USB2SNES.debug=false");
 
     QQmlApplicationEngine engine;
-    QScopedPointer<RAEngine> raEngine(new RAEngine);
+    QScopedPointer<ThanksCheeveEngine> raEngine(new ThanksCheeveEngine);
 
     fillAchievementList(raEngine.get());
     engine.addImportPath("qrc:/QML-Ui/");
-    qmlRegisterSingletonInstance("fr.nyo.RAEngine", 1, 0, "MainEngine", raEngine.get());
+    qmlRegisterSingletonInstance("fr.nyo.TCEngine", 1, 0, "MainEngine", raEngine.get());
     engine.addImageProvider(QLatin1String("badges"), raEngine->bagdgeImageProvider());
     const QUrl url(QStringLiteral("qrc:/QML-Ui/Main.qml"));
     QObject::connect(
@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
     return a.exec();
 }
 
-void    fillAchievementList (RAEngine* engine)
+void    fillAchievementList (ThanksCheeveEngine* engine)
 {
     Achievement ach;
     ach.id = 78;

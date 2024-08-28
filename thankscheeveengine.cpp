@@ -1,11 +1,11 @@
 #include "sqapplication.h"
-#include "raengine.h"
+#include "thankscheeveengine.h"
 
 Q_LOGGING_CATEGORY(log_raEngine, "RAEngine")
 #define sDebug() qCDebug(log_raEngine)
 #define sInfo() qCInfo(log_raEngine)
 
-RAEngine::RAEngine() {
+ThanksCheeveEngine::ThanksCheeveEngine() {
     achievementChecker = new AchievementChecker(this);
     raWebAPIManager = new RAWebApiManager(this);
     usb2snes = new USB2snes();
@@ -24,7 +24,7 @@ RAEngine::RAEngine() {
     }
     );
     skipBadges = false;
-    connect(achievementChecker, &AchievementChecker::achievementCompleted, this, &RAEngine::achievementCompleted);
+    connect(achievementChecker, &AchievementChecker::achievementCompleted, this, &ThanksCheeveEngine::achievementCompleted);
     setRememberLogin(sqApp->settings()->value("login/RememberLogin").toBool());
     setHardcoreMode(sqApp->settings()->value("general/hardcore").toBool());
     if (m_rememberLogin)
@@ -40,25 +40,25 @@ RAEngine::RAEngine() {
 }
 
 
-bool RAEngine::login(QString username, QString password)
+bool ThanksCheeveEngine::login(QString username, QString password)
 {
     sInfo() << "Remember me :" << m_rememberLogin;
     raWebAPIManager->regularLogin(username, password);
     return false;
 }
 
-Achievement RAEngine::achievement(unsigned int id)
+Achievement ThanksCheeveEngine::achievement(unsigned int id)
 {
     sDebug() << "QML requesting achievement " << id;
     return *m_achievements[id];
 }
 
-RAEngine::ConnectionStatus RAEngine::connectionStatus() const
+ThanksCheeveEngine::ConnectionStatus ThanksCheeveEngine::connectionStatus() const
 {
     return m_connectionStatus;
 }
 
-void RAEngine::setConnectionStatus(ConnectionStatus newConnectionStatus)
+void ThanksCheeveEngine::setConnectionStatus(ConnectionStatus newConnectionStatus)
 {
     if (m_connectionStatus == newConnectionStatus)
         return;
@@ -66,19 +66,19 @@ void RAEngine::setConnectionStatus(ConnectionStatus newConnectionStatus)
     emit connectionStatusChanged();
 }
 
-AchievementModel *RAEngine::achievementsModel() const
+AchievementModel *ThanksCheeveEngine::achievementsModel() const
 {
     return m_achievementsModel;
 }
 
-void RAEngine::setStatus(Status status)
+void ThanksCheeveEngine::setStatus(Status status)
 {
     sInfo() << "Status changed " << status;
     m_status = status;
     emit statusChanged();
 }
 
-void RAEngine::checkHardcoreCompatible()
+void ThanksCheeveEngine::checkHardcoreCompatible()
 {
     if (usb2snesInfos.secondField == "SD2SNES")
     {
@@ -86,7 +86,7 @@ void RAEngine::checkHardcoreCompatible()
     }
 }
 
-void RAEngine::testAddAchievement(Achievement ach)
+void ThanksCheeveEngine::testAddAchievement(Achievement ach)
 {
     Achievement* newAch = new Achievement();
     *newAch = ach;
@@ -94,12 +94,12 @@ void RAEngine::testAddAchievement(Achievement ach)
     m_achievements[ach.id] = newAch;
 }
 
-BadgeImageProvider *RAEngine::bagdgeImageProvider() const
+BadgeImageProvider *ThanksCheeveEngine::bagdgeImageProvider() const
 {
     return m_badgeImageProvider;
 }
 
-void RAEngine::setUsb2Snes()
+void ThanksCheeveEngine::setUsb2Snes()
 {
     usb2snesCheckConnectedTimer.setInterval(500);
     connect(&usb2snesCheckConnectedTimer, &QTimer::timeout, this, [=]{
@@ -149,7 +149,7 @@ void RAEngine::setUsb2Snes()
     });
 }
 
-void RAEngine::setRAWebApiManager()
+void ThanksCheeveEngine::setRAWebApiManager()
 {
     connect(raWebAPIManager, &RAWebApiManager::loginSuccess, this, [=] {
         if (m_rememberLogin)
@@ -226,7 +226,7 @@ void RAEngine::setRAWebApiManager()
     });
 }
 
-void RAEngine::achievementCompleted(unsigned int id)
+void ThanksCheeveEngine::achievementCompleted(unsigned int id)
 {
     // We probably want to validate stuff when the server accept it?
     sInfo() << m_achievements[id]->title << " Achieved";
@@ -241,7 +241,7 @@ void RAEngine::achievementCompleted(unsigned int id)
     emit achievementAchieved(*m_achievements[id]);
 }
 
-void RAEngine::startSession()
+void ThanksCheeveEngine::startSession()
 {
     achievementChecker->prepareCheck(raWebAPIManager->gameInfos.rawAchievements);
     sDebug() << "Setting before starting the session";
@@ -256,17 +256,17 @@ void RAEngine::startSession()
     usb2snes->getAsyncAddress(*achievementChecker->memoriesToCheck());
 }
 
-RAEngine::Status RAEngine::status() const
+ThanksCheeveEngine::Status ThanksCheeveEngine::status() const
 {
     return m_status;
 }
 
-bool RAEngine::hardcoreMode() const
+bool ThanksCheeveEngine::hardcoreMode() const
 {
     return m_hardcoreMode;
 }
 
-void RAEngine::setHardcoreMode(bool newHardcoreMode)
+void ThanksCheeveEngine::setHardcoreMode(bool newHardcoreMode)
 {
     if (m_hardcoreMode == newHardcoreMode)
         return;
@@ -275,12 +275,12 @@ void RAEngine::setHardcoreMode(bool newHardcoreMode)
     emit hardcoreModeChanged();
 }
 
-bool RAEngine::rememberLogin() const
+bool ThanksCheeveEngine::rememberLogin() const
 {
     return m_rememberLogin;
 }
 
-void RAEngine::setRememberLogin(bool newRememberLogin)
+void ThanksCheeveEngine::setRememberLogin(bool newRememberLogin)
 {
     if (m_rememberLogin == newRememberLogin)
         return;

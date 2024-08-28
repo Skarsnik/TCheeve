@@ -1,14 +1,15 @@
 import QtQuick 2.15
 import QtQuick.Controls
-import fr.nyo.RAEngine 1.0
+import fr.nyo.TCEngine 1.0
 import QtTextToSpeech
 
 Window {
+    property bool hardcoreMode : MainEngine.hardcoreMode
     width: mainScreen.width
     height: mainScreen.height
 
     visible: true
-    title: "RAStuff - Yay"
+    title: "Thanks Cheeve"
 
     MainScreen {
         id: mainScreen

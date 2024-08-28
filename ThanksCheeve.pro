@@ -24,7 +24,6 @@ SOURCES += \
     memoryviewer.cpp \
     memoryviewwidget.cpp \
     nwaccess.cpp \
-    raengine.cpp \
     ramanager.cpp \
     rastuff.cpp \
     rcheevos/condition.c \
@@ -38,6 +37,7 @@ SOURCES += \
     rcheevos/consoleinfo.c \
     rcheevos/rc_util.c \
     rcheevos/trigger.c \
+    thankscheeveengine.cpp \
     usb2snes.cpp
 
 HEADERS += \
@@ -49,7 +49,6 @@ HEADERS += \
     memoryviewer.h \
     memoryviewwidget.h \
     nwaccess.h \
-    raengine.h \
     ramanager.h \
     rastruct.h \
     rastuff.h \
@@ -63,12 +62,13 @@ HEADERS += \
     rcheevos/rc_consoles.h \
     rcheevos/rc_version.h \
     sharedstruct.h \
+    thankscheeveengine.h \
     usb2snes.h
 
 DEFINES += RC_DISABLE_LUA
 DEFINES += SQPROJECT_DEVEL
 
-RC_FILE = RAStuff.rc
+RC_FILE = ThanksCheeve.rc
 
 FORMS += \
     achievementlistitem.ui \
@@ -81,5 +81,6 @@ DISTFILES += \
 
 
 RESOURCES += \
-    rastuff.qrc
+    ThanksCheeve.qrc
 
+TARGET = TCheeve

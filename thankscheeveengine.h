@@ -1,5 +1,5 @@
-#ifndef RAENGINE_H
-#define RAENGINE_H
+#ifndef THANKSCHEEVEENGINE_H
+#define THANKSCHEEVEENGINE_H
 
 #include <QtQmlIntegration>
 #include <QObject>
@@ -11,7 +11,7 @@
 #include "usb2snes.h"
 #include "badgeimageprovider.h"
 
-class RAEngine : public QObject
+class ThanksCheeveEngine : public QObject
 {
     Q_OBJECT
     QML_ELEMENT
@@ -36,7 +36,7 @@ public:
     Q_PROPERTY(AchievementModel* achievementsModel READ achievementsModel CONSTANT FINAL)
     Q_PROPERTY(bool rememberLogin READ rememberLogin WRITE setRememberLogin NOTIFY rememberLoginChanged FINAL)
     Q_PROPERTY(bool hardcoreMode READ hardcoreMode WRITE setHardcoreMode NOTIFY hardcoreModeChanged FINAL)
-    RAEngine();
+    ThanksCheeveEngine();
 
     Q_INVOKABLE bool            login(QString username, QString password);
     // Q_GADGET does not allow to be returned as pointer, maybe fallback to
@@ -51,7 +51,7 @@ public:
     void    testAddAchievement(Achievement ach);
     BadgeImageProvider*    bagdgeImageProvider() const;
 
-    RAEngine::Status status() const;
+    ThanksCheeveEngine::Status status() const;
 
     bool hardcoreMode() const;
     void setHardcoreMode(bool newHardcoreMode);
@@ -93,7 +93,7 @@ private:
     bool                                m_hardcoreMode;
 
     void    setAchievementModel(AchievementModel *newAchievementModel);
-    void    setStatus(RAEngine::Status status);
+    void    setStatus(ThanksCheeveEngine::Status status);
     void    checkHardcoreCompatible();
 
     void    setUsb2Snes();
@@ -106,4 +106,4 @@ private:
     bool m_rememberLogin;
 };
 
-#endif // RAENGINE_H
+#endif // THANKSCHEEVEENGINE_H

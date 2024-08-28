@@ -8,8 +8,6 @@ Check out https://doc.qt.io/qtcreator/creator-quick-ui-forms.html for details on
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts
-import fr.nyo.RAEngine;
-
 
 /*
   This is actually where an achievement 'tile' is defined
@@ -35,7 +33,7 @@ Rectangle {
     height : 80
     color: {
         var munlocked = false;
-        if (MainEngine.hardcoreMode)
+        if (hardcoreMode)
             munlocked = hardcoreUnlocked;
         else
             munlocked = unlocked;

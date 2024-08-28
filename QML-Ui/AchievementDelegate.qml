@@ -12,26 +12,15 @@ import fr.nyo.RAEngine;
 
 
 /*
-    unsigned int    achId;
-    QString         title;
-    QString         description;
-    QString         author;
-    unsigned int    rarity;
-    unsigned int    rarityHardcore;
-    unsigned int    points;
-    bool            unlocked;
-    bool            hardcoreUnlocked;
-    QDateTime       unlockedTime;
-    QString         badgeId;
-    QString         badgeLockedId;
-  */
+  This is actually where an achievement 'tile' is defined
+ */
 
 
 Rectangle {
     // This list all the ach properpy
     required property int achId
-    required property string title // : "test"
-    required property string description //: "default description"
+    required property string title
+    required property string description
     required property int rarity
     required property int rarityHardcore
     required property int points

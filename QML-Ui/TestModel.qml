@@ -2,24 +2,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 
-// This is just data to fill when there is
-// no engine
-
-/*
-    unsigned int    achId;
-    QString         title;
-    QString         description;
-    QString         author;
-    unsigned int    rarity;
-    unsigned int    rarityHardcore;
-    unsigned int    points;
-    bool            unlocked;
-    bool            hardcoreUnlocked;
-    QDateTime       unlockedTime;
-    QString         badgeId;
-    QString         badgeLockedId;
-  */
-
 
 ListModel {
     id: testModel

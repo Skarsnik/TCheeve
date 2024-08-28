@@ -15,6 +15,8 @@ Rectangle {
     property bool logged : false
     width: 600
     height: 600
+    // Login dialog is in the LoginDialog.qml file
+    // This is just some logic
     LoginDialog {
         id : loginDialog
         onLoginDialogButtonClicked: MainEngine.login(login, password)
@@ -25,7 +27,7 @@ Rectangle {
                 {
                     loginDialog.accept();
                 } else {
-                    loginDialog.statusText = "Login failed";
+                    loginDialog.statusText = qsTr("Login failed");
                 }
             }
         }
@@ -36,6 +38,8 @@ Rectangle {
         Button {
             id: loginButton
             enabled: logged === false
+            // Please us the qsTr() function when setting text
+            // This allows the text to be extracted for translation
             text: qsTr("Login")
             onClicked: () => loginDialog.open()
         }
@@ -66,6 +70,7 @@ Rectangle {
         }
     }
 
+    // This is what display the achievements list
     ListView {
         id: achievementListView
         clip: true
@@ -75,8 +80,10 @@ Rectangle {
         x : 20
         boundsBehavior: Flickable.StopAtBounds
         flickableDirection: Flickable.VerticalFlick
+        // Don't touch this x)
         model: MainEngine.achievementsModel
         ScrollBar.vertical: ScrollBar {}
+        // That how achievements are displayed, check the AchievementDelegate.qml file
         delegate: AchievementDelegate {}
     }
 }

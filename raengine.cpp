@@ -25,7 +25,6 @@ RAEngine::RAEngine() {
     );
     skipBadges = false;
     connect(achievementChecker, &AchievementChecker::achievementCompleted, this, &RAEngine::achievementCompleted);
-    //login("Skarsnik", "gobbla42");
     setRememberLogin(sqApp->settings()->value("login/RememberLogin").toBool());
     setHardcoreMode(sqApp->settings()->value("general/hardcore").toBool());
     if (m_rememberLogin)
@@ -236,7 +235,7 @@ void RAEngine::achievementCompleted(unsigned int id)
         m_achievements[id]->unlocked = true;
     m_achievements[id]->unlockedTime = QDateTime::currentDateTime();
     m_achievementsModel->achievementUpdated(id);
-    raWebAPIManager->awardAchievement(id, false);
+    raWebAPIManager->awardAchievement(id, m_hardcoreMode);
     emit achievementAchieved(*m_achievements[id]);
 }
 

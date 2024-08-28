@@ -52,8 +52,7 @@ struct RawAchievement {
     QDateTime       modifiedTime;
     unsigned int    rarity;
     unsigned int    rarityHardcore;
-    bool            unlocked; // FIXME, should separate hardcore & softcore?
-
+    bool            unlocked;
     unsigned int    flags; //TODO
     unsigned int    type;
     QString         memAddrString;

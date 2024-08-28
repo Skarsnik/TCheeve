@@ -23,6 +23,7 @@ public:
     Q_PROPERTY(QDateTime unlockedTime MEMBER unlockedTime)
     Q_PROPERTY(QString badgeId MEMBER badgeId)
     Q_PROPERTY(QString badgeLockedId MEMBER badgeLockedId)
+    Q_PROPERTY(bool official MEMBER official)
 
     unsigned int    id;
     QString         title;
@@ -36,6 +37,7 @@ public:
     QDateTime       unlockedTime;
     QString         badgeId;
     QString         badgeLockedId;
+    bool            official;
 };
 
 

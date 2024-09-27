@@ -126,6 +126,7 @@ void ThanksCheeveEngine::setUsb2Snes()
         if (infos.isMenu == false)
         {
             usb2snesCheckInfoTimer.stop();
+            raWebAPIManager->deviceName = infos.secondField;
             usb2snes->getFile(infos.romPlayed);
         } else {
             setConnectionStatus(ConnectionStatus::NoGame);

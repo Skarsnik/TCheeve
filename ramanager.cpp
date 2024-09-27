@@ -252,7 +252,7 @@ void RAWebApiManager::doPostRequest(QString function, QMap<QString, QString> key
     QNetworkRequest request;
     request.setUrl(baseRequestUrl);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-    request.setHeader(QNetworkRequest::UserAgentHeader, "BizHawk/GIT master#1b961f248");
+    request.setHeader(QNetworkRequest::UserAgentHeader, "T.Cheeve/v0.1 (" + deviceName + ")");
     QUrlQuery querry;
     querry.addQueryItem("r", function);
     for (const QString& key : keys.keys())

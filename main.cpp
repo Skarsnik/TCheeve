@@ -40,8 +40,6 @@ int main(int argc, char *argv[])
         },
         Qt::QueuedConnection);
     engine.load(url);
-    /*RAStuff w;
-    w.show();*/
     return a.exec();
 }
 

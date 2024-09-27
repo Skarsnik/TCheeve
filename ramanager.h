@@ -17,6 +17,7 @@ public:
     void    getGameInfos(const int gameId);
     UserInfos userInfos;
     GameInfos gameInfos;
+    QString deviceName;
     QMap<unsigned int, QDateTime>   startSessionDatas;
     QList<unsigned int>             unlocks;
 

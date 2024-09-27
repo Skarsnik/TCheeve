@@ -8,7 +8,7 @@ CONFIG += c++17
 
 include(EmuNWAccess-qt.pri)
 include(SkarsnikQtCommon/Logs/sqlogging.pri)
-include(SkarsnikQtCommon/SQApplication/SQApplication.pri)
+include(SkarsnikQtCommon/SQApplication/sqapplication.pri)
 
 INCLUDEPATH += rcheevos
 

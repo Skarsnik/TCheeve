@@ -127,7 +127,10 @@ void ThanksCheeveEngine::setUsb2Snes()
         {
             usb2snesCheckInfoTimer.stop();
             raWebAPIManager->deviceName = infos.secondField;
-            usb2snes->getFile(infos.romPlayed);
+            usb2snes->getAsyncAddress(0xFC0000, 4, USB2snes::CMD);
+            sInfo() << "Checking for hardcore compatibility";
+            setConnectionStatus(ConnectionStatus::CheckingHardcoreCompatibility);
+            //usb2snes->getFile(infos.romPlayed);
         } else {
             setConnectionStatus(ConnectionStatus::NoGame);
         }
@@ -137,6 +140,17 @@ void ThanksCheeveEngine::setUsb2Snes()
         usb2snes->infos();
     });
     connect(usb2snes, &USB2snes::fileGet, this, [=] {
+        if (m_connectionStatus == ConnectionStatus::CheckingHardcoreCompatibility)
+        {
+            QString configFile = QString::fromUtf8(usb2snes->getFileData());
+            if (configFile.contains("EnableIngameSavestate: 0"))
+                setHardcoreMode(true);
+            else
+                setHardcoreMode(false);
+            setConnectionStatus(ConnectionStatus::GettingGame);
+            usb2snes->getFile(usb2snesInfos.romPlayed);
+            return ;
+        }
         QByteArray romData = usb2snes->getFileData();
         if (romData.size() & 512)
             romData = romData.mid(512);
@@ -145,6 +159,12 @@ void ThanksCheeveEngine::setUsb2Snes()
         raWebAPIManager->getGameId(md5);
     });
     connect(usb2snes, &USB2snes::getAddressDataReceived, this, [=] {
+        if (m_connectionStatus == ConnectionStatus::CheckingHardcoreCompatibility)
+        {
+            setHardcoreMode(usb2snes->getAsyncAdressData() == QByteArray::fromHex("00000000"));
+            usb2snes->getFile("/sd2snes/config.yml");
+            return ;
+        }
         achievementChecker->checkAchievements(usb2snes->getAsyncAdressData());
         usb2snes->getAsyncAddress(*achievementChecker->memoriesToCheck());
     });

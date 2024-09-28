@@ -32,7 +32,6 @@ Window {
 
         // The session is started
         function onSessionStarted() {
-            mainScreen.hardcoreChoiceEnabled = false;
             tts.say("RetroAchievements session started");
         }
         // When an achievement is unlocked

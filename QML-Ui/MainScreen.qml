@@ -11,7 +11,6 @@ import fr.nyo.TCEngine 1.0
 */
 
 Rectangle {
-    property bool hardcoreChoiceEnabled : true
     property bool logged : false
     width: 600
     height: 600
@@ -62,10 +61,7 @@ Rectangle {
         CheckBox {
             id: hardcoreCheckbox
             checked: MainEngine.hardcoreMode
-            enabled: hardcoreChoiceEnabled;
-            onCheckedChanged: {
-                MainEngine.hardcoreMode = checked;
-            }
+            enabled: false;
             text : qsTr("Hardcore mode");
         }
     }

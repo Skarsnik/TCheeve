@@ -20,6 +20,8 @@ public:
         NotConnected,
         Connected,
         NoGame,
+        CheckingHardcoreCompatibility,
+        GettingGame,
         Ready
     };
     enum class Status {
@@ -35,7 +37,7 @@ public:
     Q_PROPERTY(Status status READ status NOTIFY statusChanged FINAL)
     Q_PROPERTY(AchievementModel* achievementsModel READ achievementsModel CONSTANT FINAL)
     Q_PROPERTY(bool rememberLogin READ rememberLogin WRITE setRememberLogin NOTIFY rememberLoginChanged FINAL)
-    Q_PROPERTY(bool hardcoreMode READ hardcoreMode WRITE setHardcoreMode NOTIFY hardcoreModeChanged FINAL)
+    Q_PROPERTY(bool hardcoreMode READ hardcoreMode NOTIFY hardcoreModeChanged FINAL)
     ThanksCheeveEngine();
 
     Q_INVOKABLE bool            login(QString username, QString password);
@@ -54,7 +56,6 @@ public:
     ThanksCheeveEngine::Status status() const;
 
     bool hardcoreMode() const;
-    void setHardcoreMode(bool newHardcoreMode);
 
     bool rememberLogin() const;
     void setRememberLogin(bool newRememberLogin);
@@ -92,9 +93,11 @@ private:
     bool                                skipBadges;
     bool                                m_hardcoreMode;
 
+
     void    setAchievementModel(AchievementModel *newAchievementModel);
     void    setStatus(ThanksCheeveEngine::Status status);
     void    checkHardcoreCompatible();
+    void    setHardcoreMode(bool newHardcoreMode);
 
     void    setUsb2Snes();
     void    setRAWebApiManager();

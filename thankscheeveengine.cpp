@@ -144,7 +144,7 @@ void ThanksCheeveEngine::setUsb2Snes()
         {
             QString configFile = QString::fromUtf8(usb2snes->getFileData());
             if (configFile.contains("EnableIngameSavestate: 0"))
-                setHardcoreMode(true);
+                setHardcoreMode(true && m_hardcoreMode);
             else
                 setHardcoreMode(false);
             setConnectionStatus(ConnectionStatus::GettingGame);

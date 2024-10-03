@@ -37,6 +37,8 @@ public:
 
 signals:
     void    achievementCompleted(unsigned int id);
+    void    achievementPrimed(unsigned int id);
+    void    achievementUnprimed(unsigned int id);
 
 private:
 
@@ -53,6 +55,7 @@ private:
     QMap<unsigned int, rc_condset_t*>           cheevosCondset;
     QMap<unsigned int, rc_condset_memrefs_t*>   cheevosMemRefs;
     QMap<unsigned int, rc_trigger_t*>           cheevosTriggers;
+    QMap<unsigned int, TriggerState>            previousState;
     MemoryViewer*                               memView;
 
     QList<QPair<int, int> > * buildMemoryChecks();

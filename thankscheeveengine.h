@@ -64,6 +64,8 @@ signals:
     void    connectionStatusChanged();
     void    statusChanged();
     void    achievementAchieved(Achievement);
+    void    achievementPrimed(Achievement);
+    void    achievementUnprimed(Achievement);
     void    ready();
     void    loginDone(bool success);
     void    sessionStarted();
@@ -104,6 +106,8 @@ private:
     void    gameIdGotten(int id);
     void    usb2snesGameStarted(QString romPlaying);
     void    achievementCompleted(unsigned int id);
+    void    achievementIPrimed(unsigned int id);
+    void    achievementIUnprimed(unsigned int id);
     void    getBadges();
     void    startSession();
     bool m_rememberLogin;

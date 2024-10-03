@@ -51,12 +51,14 @@ QList<QPair<int, int> > *AchievementChecker::prepareCheck(QList<RawAchievement> 
 {
     cheevosCondset.clear();
     cheevosMemRefs.clear();
+    previousState.clear();
 
     for (const RawAchievement& ach : achievements)
     {
         if (ach.unlocked)
             continue;
         QByteArray bTmp = ach.memAddrString.toLocal8Bit();
+        previousState[ach.id] = RC_TRIGGER_STATE_INACTIVE;
         const char* memaddr = bTmp.constData();
         rc_trigger_t*       new_trigger;
         size_t              size_alloc = rc_trigger_size(memaddr);
@@ -163,7 +165,7 @@ void AchievementChecker::checkAchievements(const QByteArray& bdatas)
             sDebug() << "Hit the 0x57f == 0x90" << nbHits;
         }*/
         TriggerState state = static_cast<TriggerState>(trigger->state);
-        if (trigger->state == RC_TRIGGER_STATE_TRIGGERED)
+        if (state == RC_TRIGGER_STATE_TRIGGERED)
         {
             sInfo() << key << "Achievement achieved " << key;
             m_achievementsMemLists.remove(key);
@@ -171,6 +173,19 @@ void AchievementChecker::checkAchievements(const QByteArray& bdatas)
             buildMemoryChecks();
             emit achievementCompleted(key);
         }
+        if (state == RC_TRIGGER_STATE_PRIMED && previousState[key] != RC_TRIGGER_STATE_PRIMED)
+        {
+            sInfo() << key << "Achievement primed" << key;
+            emit achievementPrimed(key);
+        }
+        if (previousState[key] == RC_TRIGGER_STATE_PRIMED
+            && state != RC_TRIGGER_STATE_PRIMED
+            && state != RC_TRIGGER_STATE_TRIGGERED)
+        {
+            sInfo() << "Unprimed";
+            emit achievementUnprimed(key);
+        }
+        previousState[key] = state;
     }
 }
 

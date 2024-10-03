@@ -223,7 +223,7 @@ void USB2snes::onWebSocketBinaryReceived(QByteArray message)
       sDebug() << "<<B" << "Received " << message.size() << " byte of data " << buffer.size() << requestedBinaryReadSize;
     if ((unsigned int) buffer.size() == requestedBinaryReadSize)
     {
-        sDebug() << "Gets all the datas";
+        sDebug() << "Got all the datas";
         lastBinaryMessage = buffer;
         emit binaryMessageReceived();
         if (doingAsyncGetAddress)
@@ -231,16 +231,19 @@ void USB2snes::onWebSocketBinaryReceived(QByteArray message)
             m_istate = IReady;
             doingAsyncGetAddress = false;
             emit getAddressDataReceived();
+            goto endofwbr;
         }
         if (m_lastCommande == "GetAddress" && doingAsyncGetAddress == false)
         {
             m_istate = IReady;
             emit getAddressDataReceived();
+            goto endofwbr;
         }
         if (m_lastCommande == "GetFile")
         {
             emit fileGet();
         }
+        endofwbr:
         buffer.clear();
     }
 }

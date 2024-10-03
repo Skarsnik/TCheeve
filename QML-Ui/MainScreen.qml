@@ -24,7 +24,7 @@ Rectangle {
             function onLoginDone(success) {
                 if (success)
                 {
-                    loginDialog.accept();
+                    loginDialog.accept();;
                 } else {
                     loginDialog.statusText = qsTr("Login failed");
                 }

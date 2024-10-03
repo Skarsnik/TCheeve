@@ -9,5 +9,11 @@
         <file>QML-Ui/AchievementDelegate.qml</file>
         <file>QML-Ui/TestModel.qml</file>
         <file>QML-Ui/LoginDialog.qml</file>
+        <file>Sounds/chicken-46803.mp3</file>
+        <file>Sounds/chicken-101726.mp3</file>
+        <file>Sounds/chicken-noise-196746.mp3</file>
+        <file>Sounds/chicken-noise-228106.mp3</file>
+        <file>Sounds/rooster-cry-173621.mp3</file>
     </qresource>
+    <qresource prefix="/Sound"/>
 </RCC>

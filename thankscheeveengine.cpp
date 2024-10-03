@@ -25,6 +25,8 @@ ThanksCheeveEngine::ThanksCheeveEngine() {
     );
     skipBadges = false;
     connect(achievementChecker, &AchievementChecker::achievementCompleted, this, &ThanksCheeveEngine::achievementCompleted);
+    connect(achievementChecker, &AchievementChecker::achievementPrimed, this, &ThanksCheeveEngine::achievementIPrimed);
+    connect(achievementChecker, &AchievementChecker::achievementUnprimed, this, &ThanksCheeveEngine::achievementIUnprimed);
     setRememberLogin(sqApp->settings()->value("login/RememberLogin").toBool());
     setHardcoreMode(sqApp->settings()->value("general/hardcore").toBool());
     if (m_rememberLogin)
@@ -260,6 +262,18 @@ void ThanksCheeveEngine::achievementCompleted(unsigned int id)
     if (m_achievements[id]->official)
         raWebAPIManager->awardAchievement(id, m_hardcoreMode);
     emit achievementAchieved(*m_achievements[id]);
+}
+
+void ThanksCheeveEngine::achievementIPrimed(unsigned int id)
+{
+    sInfo() << m_achievements[id]->title << " primed";
+    emit achievementPrimed(*m_achievements[id]);
+}
+
+void ThanksCheeveEngine::achievementIUnprimed(unsigned int id)
+{
+    sInfo() << m_achievements[id]->title << "Unprimed";
+    emit achievementUnprimed(*m_achievements[id]);
 }
 
 void ThanksCheeveEngine::startSession()

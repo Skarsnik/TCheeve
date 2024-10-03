@@ -1,4 +1,4 @@
-QT       += widgets core gui network websockets texttospeech qml quick
+QT       += widgets core gui network websockets texttospeech qml quick multimedia
 
 CONFIG += c++17
 

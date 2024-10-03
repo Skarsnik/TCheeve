@@ -41,7 +41,7 @@ Rectangle {
     }
     GridLayout {
         columns : 2
-        rows : 2
+        rows : 3
         anchors.fill: parent
         Image {
             Layout.row: 0

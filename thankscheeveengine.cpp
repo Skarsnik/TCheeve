@@ -130,9 +130,9 @@ void ThanksCheeveEngine::setUsb2Snes()
             usb2snesCheckInfoTimer.stop();
             raWebAPIManager->deviceName = infos.secondField;
             usb2snes->getAsyncAddress(0xFC0000, 4, USB2snes::CMD);
+            //usb2snes->getAsyncAddress(0xF50000, 4);
             sInfo() << "Checking for hardcore compatibility";
             setConnectionStatus(ConnectionStatus::CheckingHardcoreCompatibility);
-            //usb2snes->getFile(infos.romPlayed);
         } else {
             setConnectionStatus(ConnectionStatus::NoGame);
         }
